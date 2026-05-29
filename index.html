@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLBS Framework — Nifty Options Intraday Decision</title>
+<style>
+  :root {
+    --bg: #0f1424;
+    --panel: #171d33;
+    --panel2: #1f2742;
+    --line: #2c3658;
+    --text: #e7ecf6;
+    --muted: #95a0bd;
+    --accent: #ffd166;
+    --go: #2ecc71;
+    --wait: #f4b740;
+    --no: #ff5c6c;
+    --ctx: #4dabf7;
+    --lvl: #b197fc;
+    --bias: #ffa94d;
+    --strat: #69db7c;
+    --bull: #2ecc71;
+    --bear: #ff5c6c;
+    --neu: #95a0bd;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    padding: 22px 20px 14px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 { margin: 0; font-size: 1.6rem; letter-spacing: 1px; }
+  header p { margin: 6px 0 0; color: var(--muted); font-size: 0.9rem; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 20px; }
+
+  /* ---- Flowchart diagram ---- */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: stretch;
+    margin: 6px 0 28px;
+  }
+  .node {
+    flex: 1 1 180px;
+    min-width: 160px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    position: relative;
+  }
+  .node .tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    color: #0f1424;
+  }
+  .node.ctx .tag { background: var(--ctx); }
+  .node.lvl .tag { background: var(--lvl); }
+  .node.bias .tag { background: var(--bias); }
+  .node.strat .tag { background: var(--strat); }
+  .node h3 { margin: 0 0 4px; font-size: 0.98rem; }
+  .node p { margin: 0; font-size: 0.8rem; color: var(--muted); }
+  .arrow {
+    align-self: center;
+    color: var(--muted);
+    font-size: 1.4rem;
+    flex: 0 0 auto;
+  }
+  @media (max-width: 760px) { .arrow { transform: rotate(90deg); } }
+
+  /* ---- Wizard ---- */
+  .progress { display: flex; gap: 6px; margin-bottom: 18px; }
+  .progress .seg { flex: 1; height: 6px; border-radius: 3px; background: var(--panel2); }
+  .progress .seg.active { background: var(--accent); }
+  .progress .seg.done { background: var(--go); }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+  }
+  .stage-label {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .card h2 { margin: 4px 0 18px; font-size: 1.25rem; }
+  .q { margin-bottom: 20px; }
+  .q > label.qlabel { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.98rem; }
+  .q .hint { color: var(--muted); font-weight: 400; font-size: 0.82rem; }
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    cursor: pointer; transition: border-color .12s, background .12s;
+  }
+  .opt:hover { border-color: var(--accent); }
+  .opt input { margin-top: 3px; accent-color: var(--accent); }
+  .opt .otext { font-size: 0.9rem; }
+  .opt .osub { color: var(--muted); font-size: 0.78rem; }
+  .opt.sel { border-color: var(--accent); background: rgba(255,209,102,0.08); }
+
+  /* numeric grid */
+  .numgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .numgrid .group-title {
+    grid-column: 1 / -1; font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--muted); margin: 6px 0 -4px;
+  }
+  .numfield label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+  .numfield input {
+    width: 100%; padding: 9px 10px; font-size: 0.95rem; font-family: inherit;
+    background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+  }
+  .numfield input:focus { outline: none; border-color: var(--accent); }
+
+  /* chips / computed read */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
+  .chip {
+    font-size: 0.78rem; padding: 4px 10px; border-radius: 20px;
+    border: 1px solid var(--line); background: var(--panel2);
+  }
+  .chip b { font-weight: 700; }
+  .chip.bull { border-color: var(--bull); color: var(--bull); }
+  .chip.bear { border-color: var(--bear); color: var(--bear); }
+  .chip.neu  { border-color: var(--neu);  color: var(--neu); }
+
+  .nav { display: flex; justify-content: space-between; margin-top: 10px; gap: 10px; }
+  button {
+    font-family: inherit; font-size: 0.95rem; font-weight: 600;
+    border: none; border-radius: 9px; padding: 11px 22px; cursor: pointer;
+  }
+  .btn-primary { background: var(--accent); color: #0f1424; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+  /* ---- Result ---- */
+  .verdict { text-align: center; padding: 22px; border-radius: 14px; margin-bottom: 18px; }
+  .verdict.go { background: rgba(46,204,113,0.12); border: 1px solid var(--go); }
+  .verdict.wait { background: rgba(244,183,64,0.12); border: 1px solid var(--wait); }
+  .verdict.no { background: rgba(255,92,108,0.12); border: 1px solid var(--no); }
+  .verdict .big { font-size: 2.2rem; font-weight: 800; letter-spacing: 2px; }
+  .verdict.go .big { color: var(--go); }
+  .verdict.wait .big { color: var(--wait); }
+  .verdict.no .big { color: var(--no); }
+  .verdict .sub { color: var(--muted); margin-top: 4px; }
+
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 10px; margin-bottom: 18px; }
+  .sumcard { background: var(--panel2); border-radius: 10px; padding: 12px 14px; border-left: 4px solid var(--line); }
+  .sumcard.ctx { border-left-color: var(--ctx); }
+  .sumcard.lvl { border-left-color: var(--lvl); }
+  .sumcard.bias { border-left-color: var(--bias); }
+  .sumcard.strat { border-left-color: var(--strat); }
+  .sumcard .k { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .sumcard .v { font-size: 1.02rem; font-weight: 700; margin-top: 2px; }
+
+  .block { background: var(--panel2); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  .block h4 { margin: 0 0 8px; font-size: 0.95rem; }
+  .block ul { margin: 0; padding-left: 18px; }
+  .block li { margin: 4px 0; font-size: 0.9rem; }
+  .reason-pass::marker { color: var(--go); }
+  .reason-fail::marker { color: var(--no); }
+  .reason-warn::marker { color: var(--wait); }
+
+  .disclaimer { margin-top: 24px; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+  .toggle-flow { background: transparent; color: var(--muted); border: 1px solid var(--line); font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>CLBS FRAMEWORK</h1>
+  <p>Context → Level → Bias → Strategy · Intraday Nifty Options Decision Engine</p>
+</header>
+
+<div class="wrap">
+
+  <button class="toggle-flow" id="toggleFlow">Hide framework map ▲</button>
+  <div class="flow" id="flowMap">
+    <div class="node ctx">
+      <span class="tag">C · Context</span>
+      <h3>Is the environment tradable?</h3>
+      <p>Time of day, India VIX, events, expiry, global cues. A gate — bad context = no trade.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="node lvl">
+      <span class="tag">L · Level</span>
+      <h3>Where is price vs the map?</h3>
+      <p>VWAP, Initial Balance, prior-day & prior-week Value Area / POC. No level = no edge.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="node bias">
+      <span class="tag">B · Bias</span>
+      <h3>Which way is pressure?</h3>
+      <p>Structure, OI/writing, momentum, PCR, max pain + value acceptance → Bullish / Bearish / Neutral.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="node strat">
+      <span class="tag">S · Strategy</span>
+      <h3>Does it line up + pay?</h3>
+      <p>Level–Bias confluence, instrument choice, R:R ≥ 1:2 → GO / WAIT / NO-GO.</p>
+    </div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div id="app"></div>
+
+  <div class="disclaimer">
+    <strong>Educational framework only — not investment advice.</strong> This tool structures a
+    discretionary trading checklist using inputs you provide; it does not predict markets, guarantee
+    outcomes, or constitute a recommendation to buy or sell any security. Options trading carries a
+    high risk of loss. Thresholds (VIX bands, time windows, R:R) are configurable rules of thumb, not
+    rules of the market. Trade your own plan and risk responsibly.
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CLBS decision engine — Context, Level, Bias, Strategy.
+   Level now takes numeric volume-profile references and
+   auto-derives where price stands (vs VWAP, IB, prior-day &
+   prior-week value), which feeds the bias score.
+   ============================================================ */
+
+const STAGES = [
+  {
+    id: "context", label: "C · Context", title: "Context — is the environment tradable?",
+    questions: [
+      { id: "time", label: "Current time block", hint: "When in the session are you?",
+        opts: [
+          { v: "open", t: "Open / first 15 min (9:15–9:30)", s: "High noise, fake moves" },
+          { v: "morning", t: "Morning prime (9:30–11:00)", s: "Best trend window" },
+          { v: "midday", t: "Midday (11:00–1:30)", s: "Choppy, low volume" },
+          { v: "afternoon", t: "Afternoon (1:30–3:00)", s: "Good for trend follow-through" },
+          { v: "close", t: "Final 20 min (3:10–3:30)", s: "Avoid fresh entries" },
+        ] },
+      { id: "vix", label: "India VIX level",
+        opts: [
+          { v: "vlow",     t: "Low (< 13)",          s: "Calm — small ranges, cheap premium" },
+          { v: "low",      t: "Normal-low (13–15)",  s: "Healthy for directional buying" },
+          { v: "normal",   t: "Normal (15–17)",      s: "Healthy — decent intraday range" },
+          { v: "elevated", t: "Elevated (17–20)",    s: "Whippy — size down, premiums rich" },
+          { v: "high",     t: "High (> 20)",         s: "Volatile — size down hard, prefer spreads" },
+        ] },
+      { id: "event", label: "Major scheduled event pending today (not yet released)?",
+        hint: "RBI/Fed, budget, CPI/GDP, heavyweight results.",
+        opts: [
+          { v: "no", t: "No major event pending", s: "" },
+          { v: "yes", t: "Yes — awaiting an event", s: "Markets often coil; wait for the release" },
+        ] },
+      { id: "expiry", label: "Is today an expiry day?",
+        opts: [
+          { v: "no", t: "No", s: "" },
+          { v: "yes", t: "Yes (weekly/monthly)", s: "Fast theta decay — favour ATM/ITM, scalp quick" },
+        ] },
+      { id: "cue", label: "Global / GIFT Nifty cue this morning",
+        opts: [
+          { v: "up", t: "Strongly positive", s: "" },
+          { v: "mildup", t: "Mildly positive", s: "" },
+          { v: "flat", t: "Flat / mixed", s: "" },
+          { v: "milddown", t: "Mildly negative", s: "" },
+          { v: "down", t: "Strongly negative", s: "" },
+        ] },
+    ]
+  },
+  {
+    id: "level", label: "L · Level", title: "Level — where is price vs the map?",
+    questions: [
+      { id: "levels", type: "numgroup",
+        label: "Key reference levels",
+        hint: "Enter Nifty index values. The read below updates automatically.",
+        groups: [
+          { title: "Live", fields: [
+            { id: "price", t: "Current Nifty spot" },
+            { id: "vwap",  t: "VWAP (current)" },
+          ] },
+          { title: "Initial Balance (first hour)", fields: [
+            { id: "ibh", t: "IB High (IBH)" },
+            { id: "ibl", t: "IB Low (IBL)" },
+          ] },
+          { title: "Previous Day profile", fields: [
+            { id: "pdPOC", t: "Prev-day POC" },
+            { id: "pdVAH", t: "Prev-day VAH" },
+            { id: "pdVAL", t: "Prev-day VAL" },
+          ] },
+          { title: "Previous Week profile", fields: [
+            { id: "pwPOC", t: "Prev-week POC" },
+            { id: "pwVAH", t: "Prev-week VAH" },
+            { id: "pwVAL", t: "Prev-week VAL" },
+          ] },
+        ] },
+      { id: "reaction", label: "How is price reacting at the level it's testing?",
+        hint: "Use the computed read above to judge the nearest in-play reference.",
+        opts: [
+          { v: "support",    t: "Holding a level as SUPPORT", s: "Sitting just above a reference, bouncing" },
+          { v: "resistance", t: "Rejecting a level as RESISTANCE", s: "Capped just below a reference" },
+          { v: "breakup",    t: "Broke ABOVE a level", s: "Acceptance above — watch for retest" },
+          { v: "breakdown",  t: "Broke BELOW a level", s: "Acceptance below — watch for retest" },
+          { v: "midrange",   t: "No-man's-land / inside balance", s: "Not at any clean reference" },
+        ] },
+    ]
+  },
+  {
+    id: "bias", label: "B · Bias", title: "Bias — which way is the pressure?",
+    questions: [
+      { id: "structure", label: "Price structure (5/15-min)",
+        opts: [
+          { v: "up", t: "Uptrend — higher highs & lows", s: "" },
+          { v: "down", t: "Downtrend — lower highs & lows", s: "" },
+          { v: "range", t: "Rangebound / sideways", s: "" },
+        ] },
+      { id: "oi", label: "Options OI / writing signal", hint: "Where is fresh writing concentrated?",
+        opts: [
+          { v: "put", t: "Put writing dominant", s: "Sellers defending downside — bullish" },
+          { v: "call", t: "Call writing dominant", s: "Sellers capping upside — bearish" },
+          { v: "mixed", t: "Mixed / balanced", s: "No clear OI tilt" },
+        ] },
+      { id: "momentum", label: "Momentum of the last few candles",
+        opts: [
+          { v: "bull", t: "Bullish — strong green push", s: "" },
+          { v: "bear", t: "Bearish — strong red push", s: "" },
+          { v: "flat", t: "Flat / indecisive", s: "" },
+        ] },
+      { id: "optionsData", type: "numgroup", optional: true,
+        label: "Options positioning (optional)",
+        hint: "Leave blank to skip. Max-pain compares against your spot from the Level stage.",
+        groups: [
+          { title: "Sentiment", fields: [
+            { id: "pcr", t: "PCR (Put/Call OI ratio)" },
+            { id: "maxpain", t: "Max Pain strike" },
+          ] },
+        ] },
+    ]
+  },
+  {
+    id: "strategy", label: "S · Strategy", title: "Strategy — does it line up and pay?",
+    questions: [
+      { id: "rr", label: "Can you define a clear stop, and is the target ≥ 2× that risk to the next level?",
+        hint: "Invalidation just beyond the level; target = next opposing reference (POC/VA edge/IB).",
+        opts: [
+          { v: "yes", t: "Yes — clean SL and R:R ≥ 1:2", s: "" },
+          { v: "tight", t: "Partly — R:R roughly 1:1", s: "Marginal" },
+          { v: "no", t: "No — can't define it / R:R poor", s: "" },
+        ] },
+      { id: "conviction", label: "Your honest conviction right now",
+        opts: [
+          { v: "high", t: "High — setup is textbook", s: "" },
+          { v: "med", t: "Medium — decent but not perfect", s: "" },
+          { v: "low", t: "Low — I'm forcing it", s: "" },
+        ] },
+    ]
+  },
+];
+
+const A = {};
+STAGES.forEach(s => A[s.id] = {});
+let stageIdx = 0;
+
+const app = document.getElementById("app");
+const progressEl = document.getElementById("progress");
+
+function renderProgress() {
+  progressEl.innerHTML = "";
+  STAGES.forEach((s, i) => {
+    const seg = document.createElement("div");
+    seg.className = "seg" + (i < stageIdx ? " done" : i === stageIdx ? " active" : "");
+    progressEl.appendChild(seg);
+  });
+  const seg = document.createElement("div");
+  seg.className = "seg" + (stageIdx >= STAGES.length ? " active" : "");
+  progressEl.appendChild(seg);
+}
+
+/* ---- Level map: derive relationships from the numbers ---- */
+function computeLevelMap(L) {
+  if (!L || typeof L.price !== "number") return null;
+  const p = L.price;
+  const thr = Math.max(10, p * 0.001); // ~0.1% proximity, min 10 pts
+
+  const side = (lvl) => p > lvl + thr ? "above" : p < lvl - thr ? "below" : "at";
+  const valueState = (vah, val) => p > vah ? "above" : p < val ? "below" : "inside";
+
+  const refs = [
+    { k: "VWAP", v: L.vwap }, { k: "IBH", v: L.ibh }, { k: "IBL", v: L.ibl },
+    { k: "pd POC", v: L.pdPOC }, { k: "pd VAH", v: L.pdVAH }, { k: "pd VAL", v: L.pdVAL },
+    { k: "pw POC", v: L.pwPOC }, { k: "pw VAH", v: L.pwVAH }, { k: "pw VAL", v: L.pwVAL },
+  ].filter(r => typeof r.v === "number" && !isNaN(r.v));
+
+  let nearest = null;
+  refs.forEach(r => {
+    const d = Math.abs(p - r.v);
+    if (!nearest || d < nearest.d) nearest = { k: r.k, v: r.v, d };
+  });
+  const cluster = refs.filter(r => Math.abs(p - r.v) <= thr);
+
+  const ib = p > L.ibh ? "above" : p < L.ibl ? "below" : "inside";
+  const pdValue = valueState(L.pdVAH, L.pdVAL);
+
+  // ---- auto-suggested reaction ----
+  let suggested, why;
+  if (nearest && nearest.d <= thr) {
+    if (p >= nearest.v) { suggested = "support"; why = `price resting on ${nearest.k}`; }
+    else { suggested = "resistance"; why = `price capped just under ${nearest.k}`; }
+  } else if (ib === "above" && pdValue === "above") {
+    suggested = "breakup"; why = "accepted above IBH and prior-day value";
+  } else if (ib === "below" && pdValue === "below") {
+    suggested = "breakdown"; why = "accepted below IBL and prior-day value";
+  } else if (pdValue === "inside") {
+    suggested = "midrange"; why = "inside prior-day value, away from references";
+  } else {
+    suggested = "midrange"; why = "not within range of a clean reference";
+  }
+
+  return {
+    thr,
+    vwap: side(L.vwap),
+    ib, pdValue,
+    pwValue: valueState(L.pwVAH, L.pwVAL),
+    nearest, cluster,
+    confluence: cluster.length >= 2 ? "strong" : cluster.length === 1 ? "some" : "none",
+    suggested, why,
+  };
+}
+
+function chip(text, tone) { return `<span class="chip ${tone||'neu'}">${text}</span>`; }
+
+function renderLevelRead(L) {
+  const m = computeLevelMap(L);
+  if (!m) return `<div class="block"><h4>📍 Computed location read</h4><p style="color:var(--muted);margin:0">Enter at least the current spot to see the read.</p></div>`;
+  const toneVal = (st) => st === "above" ? "bull" : st === "below" ? "bear" : "neu";
+  const lblVal = (st) => st === "above" ? "above value" : st === "below" ? "below value" : "inside value";
+  let html = `<div class="block"><h4>📍 Computed location read</h4><div class="chips">`;
+  html += chip(`VWAP: <b>${m.vwap}</b>`, m.vwap === "above" ? "bull" : m.vwap === "below" ? "bear" : "neu");
+  html += chip(`Initial Balance: <b>${m.ib === "above" ? "above IBH" : m.ib === "below" ? "below IBL" : "inside IB"}</b>`, toneVal(m.ib));
+  html += chip(`Prev-day: <b>${lblVal(m.pdValue)}</b>`, toneVal(m.pdValue));
+  html += chip(`Prev-week: <b>${lblVal(m.pwValue)}</b>`, toneVal(m.pwValue));
+  if (m.nearest) html += chip(`Nearest: <b>${m.nearest.k}</b> (${Math.round(m.nearest.d)} pts)`, "neu");
+  html += chip(`Confluence: <b>${m.confluence}</b>${m.cluster.length ? " — " + m.cluster.map(c=>c.k).join(", ") : ""}`, m.confluence === "strong" ? "bull" : "neu");
+  html += `</div>`;
+  const reactLbl = { support: "Holding support", resistance: "Rejecting resistance", breakup: "Broke above", breakdown: "Broke below", midrange: "No-man's-land / balance" };
+  html += `<p style="margin:6px 0 0;font-size:0.85rem;color:var(--muted)">★ Suggested reaction: <b style="color:var(--accent)">${reactLbl[m.suggested]}</b> — ${m.why}. Pre-selected below; override if price says otherwise.</p>`;
+  html += `</div>`;
+  return html;
+}
+
+function hasOptionsData() {
+  const od = A.bias.optionsData || {};
+  return (typeof od.pcr === "number" && !isNaN(od.pcr)) || (typeof od.maxpain === "number" && !isNaN(od.maxpain));
+}
+
+function renderOptionsRead() {
+  const od = A.bias.optionsData || {};
+  const spot = A.level.levels && A.level.levels.price;
+  const chips = [];
+  if (typeof od.pcr === "number" && !isNaN(od.pcr)) {
+    const t = od.pcr >= 1.1 ? "bull" : od.pcr <= 0.9 ? "bear" : "neu";
+    const lbl = od.pcr >= 1.1 ? "put-heavy → bullish tilt" : od.pcr <= 0.9 ? "call-heavy → bearish tilt" : "balanced → neutral";
+    chips.push(chip(`PCR ${od.pcr}: <b>${lbl}</b>`, t));
+  }
+  if (typeof od.maxpain === "number" && !isNaN(od.maxpain)) {
+    if (typeof spot === "number") {
+      const thr = Math.max(10, spot * 0.001);
+      const diff = spot - od.maxpain;
+      const pinned = Math.abs(diff) < thr;
+      const t = pinned ? "neu" : diff > 0 ? "bear" : "bull";
+      const lbl = pinned ? "spot pinned at max pain → expect chop" : diff > 0 ? "spot above max pain → downward pull" : "spot below max pain → upward pull";
+      chips.push(chip(`Max Pain ${od.maxpain}: <b>${lbl}</b>`, t));
+    } else {
+      chips.push(chip(`Max Pain ${od.maxpain}: <b>enter spot in Level stage to compare</b>`, "neu"));
+    }
+  }
+  if (!chips.length) return `<div class="block"><h4>🧮 Options read</h4><p style="margin:0;color:var(--muted)">Optional — enter PCR and/or Max Pain to factor positioning into the bias.</p></div>`;
+  return `<div class="block"><h4>🧮 Options read</h4><div class="chips">${chips.join("")}</div></div>`;
+}
+
+function questionAnswered(stage, q) {
+  if (q.type === "numgroup") {
+    if (q.optional) return true;
+    const obj = A[stage.id][q.id];
+    if (!obj) return false;
+    return q.groups.every(g => g.fields.every(f => typeof obj[f.id] === "number" && !isNaN(obj[f.id]) && obj[f.id] > 0));
+  }
+  return A[stage.id][q.id] != null;
+}
+function stageComplete(stage) { return stage.questions.every(q => questionAnswered(stage, q)); }
+
+function radioOptsInner(stage, q) {
+  let suggested = null;
+  if (q.id === "reaction") { const m = computeLevelMap(A.level.levels); suggested = m ? m.suggested : null; }
+  let h = "";
+  q.opts.forEach(o => {
+    const sel = A[stage.id][q.id] === o.v;
+    const badge = (q.id === "reaction" && suggested === o.v) ? ` <span class="osub" style="color:var(--accent)">★ suggested</span>` : "";
+    h += `<label class="opt${sel ? " sel" : ""}">
+      <input type="radio" name="${stage.id}.${q.id}" value="${o.v}" ${sel ? "checked" : ""}>
+      <span><span class="otext">${o.t}${badge}</span>${o.s ? `<br><span class="osub">${o.s}</span>` : ""}</span>
+    </label>`;
+  });
+  return h;
+}
+
+function radioChangeHandler(e) {
+  const [sid, qid] = e.target.name.split(".");
+  A[sid][qid] = e.target.value;
+  if (qid === "reaction") A.level._reactionManual = true;
+  renderStage();
+}
+
+function bindRadiosIn(container) {
+  container.querySelectorAll("input[type=radio]").forEach(inp => {
+    inp.addEventListener("change", radioChangeHandler);
+  });
+}
+
+function renderStage() {
+  renderProgress();
+  const stage = STAGES[stageIdx];
+  // auto-fill suggested reaction from the computed map (unless user overrode it)
+  if (stage.id === "level" && !A.level._reactionManual) {
+    const sm = computeLevelMap(A.level.levels);
+    if (sm) A.level.reaction = sm.suggested;
+  }
+  let html = `<div class="card"><div class="stage-label">${stage.label}</div>`;
+  html += `<h2>${stage.title}</h2>`;
+
+  stage.questions.forEach(q => {
+    html += `<div class="q"><label class="qlabel">${q.label}`;
+    if (q.hint) html += ` <span class="hint">${q.hint}</span>`;
+    html += `</label>`;
+
+    if (q.type === "numgroup") {
+      const obj = A[stage.id][q.id] || {};
+      html += `<div class="numgrid">`;
+      q.groups.forEach(g => {
+        html += `<div class="group-title">${g.title}</div>`;
+        g.fields.forEach(f => {
+          const val = typeof obj[f.id] === "number" ? obj[f.id] : "";
+          html += `<div class="numfield"><label>${f.t}</label>
+            <input type="number" step="any" inputmode="decimal" data-q="${q.id}" data-f="${f.id}" value="${val}" placeholder="0"></div>`;
+        });
+      });
+      html += `</div>`;
+      if (q.id === "levels") html += `<div id="levelRead">${renderLevelRead(A.level.levels)}</div>`;
+      if (q.id === "optionsData") html += `<div id="optionsRead">${renderOptionsRead()}</div>`;
+    } else {
+      const isReaction = q.id === "reaction";
+      html += `<div class="opts"${isReaction ? ' id="reactionOpts"' : ''}>${radioOptsInner(stage, q)}</div>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `<div class="nav">
+    <button class="btn-ghost" id="backBtn" ${stageIdx === 0 ? "style='visibility:hidden'" : ""}>← Back</button>
+    <button class="btn-primary" id="nextBtn" disabled>${stageIdx === STAGES.length - 1 ? "See verdict →" : "Next →"}</button>
+  </div></div>`;
+  app.innerHTML = html;
+
+  bindRadiosIn(app);
+
+  // number handlers (no full re-render — keep focus; just update reads + dependents)
+  app.querySelectorAll("input[type=number]").forEach(inp => {
+    inp.addEventListener("input", e => {
+      const sid = stage.id, qid = e.target.dataset.q, fid = e.target.dataset.f;
+      if (!A[sid][qid]) A[sid][qid] = {};
+      const raw = e.target.value;
+      A[sid][qid][fid] = raw === "" ? undefined : parseFloat(raw);
+
+      if (sid === "level") {
+        const readEl = document.getElementById("levelRead");
+        if (readEl) readEl.innerHTML = renderLevelRead(A.level.levels);
+        if (!A.level._reactionManual) {
+          const m2 = computeLevelMap(A.level.levels);
+          if (m2) A.level.reaction = m2.suggested;
+        }
+        const rc = document.getElementById("reactionOpts");
+        if (rc) {
+          rc.innerHTML = radioOptsInner(stage, stage.questions.find(x => x.id === "reaction"));
+          bindRadiosIn(rc);
+        }
+      }
+      if (sid === "bias") {
+        const oR = document.getElementById("optionsRead");
+        if (oR) oR.innerHTML = renderOptionsRead();
+      }
+      const nb = document.getElementById("nextBtn");
+      if (nb) nb.disabled = !stageComplete(stage);
+    });
+  });
+
+  const nextBtn = document.getElementById("nextBtn");
+  if (nextBtn) {
+    nextBtn.disabled = !stageComplete(stage);
+    nextBtn.addEventListener("click", () => {
+      if (stageIdx < STAGES.length - 1) { stageIdx++; renderStage(); }
+      else { stageIdx = STAGES.length; renderResult(); }
+    });
+  }
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) backBtn.addEventListener("click", () => { stageIdx--; renderStage(); });
+}
+
+/* ---------------- Decision logic ---------------- */
+function evaluate() {
+  const c = A.context, b = A.bias, s = A.strategy;
+  const L = A.level.levels, loc = A.level.reaction;
+  const m = computeLevelMap(L);
+  const reasons = [];
+  let hardFail = false, softWarn = false;
+
+  // ---- CONTEXT gate ----
+  let ctxState = "Tradable";
+  if (c.event === "yes") { reasons.push({ t: "fail", x: "Context: a major event is pending — markets coil before it. Wait for the release." }); hardFail = true; ctxState = "Stand aside (event)"; }
+  if (c.time === "open") { reasons.push({ t: "warn", x: "Context: opening 15 min is noisy — let the range form before committing." }); softWarn = true; ctxState = "Cautious (open noise)"; }
+  if (c.time === "close") { reasons.push({ t: "fail", x: "Context: final 20 min — avoid fresh intraday entries; theta + thin liquidity." }); hardFail = true; ctxState = "Stand aside (late)"; }
+  if (c.time === "midday") { reasons.push({ t: "warn", x: "Context: midday chop — moves often fail; demand a cleaner setup." }); softWarn = true; }
+  if (c.vix === "vlow") { reasons.push({ t: "warn", x: "Context: VIX < 13 — ranges may be small; don't expect runaway moves from option buying." }); }
+  if (c.vix === "elevated") { reasons.push({ t: "warn", x: "Context: VIX 17–20 (elevated) — size down, expect whips, prefer spreads to cap premium risk." }); softWarn = true; }
+  if (c.vix === "high") { reasons.push({ t: "warn", x: "Context: VIX > 20 — volatile; size down hard and prefer defined-risk spreads over naked buying." }); softWarn = true; }
+  if (!hardFail && !softWarn) reasons.push({ t: "pass", x: "Context: clean — good time block, manageable volatility, no event overhang." });
+
+  // ---- LEVEL gate ----
+  let lvlState = "At a level";
+  if (loc === "midrange") { reasons.push({ t: "fail", x: "Level: price is in no-man's-land / mid-balance — no defined edge or invalidation. Don't trade the middle." }); hardFail = true; lvlState = "No level (mid-range)"; }
+  else { reasons.push({ t: "pass", x: `Level: price is reacting at a defined reference (${labelOf("level","reaction",loc)}${m && m.nearest ? ", nearest " + m.nearest.k : ""}).` }); }
+
+  if (m) {
+    if (m.confluence === "none" && loc !== "midrange") { reasons.push({ t: "warn", x: "Level: no reference cluster within ~0.1% of price — weak confluence; treat as low-conviction." }); softWarn = true; }
+    else if (m.confluence === "strong") { reasons.push({ t: "pass", x: `Level: strong confluence — ${m.cluster.map(c=>c.k).join(", ")} stack near price.` }); }
+    if (m.vwap === "at") { reasons.push({ t: "warn", x: "Level: price is sitting right on VWAP — indecision lowers edge until it picks a side." }); softWarn = true; }
+    // value-acceptance context
+    if (m.pdValue === "above") reasons.push({ t: "pass", x: "Level: trading above prior-day value (VAH) — bullish acceptance backdrop." });
+    else if (m.pdValue === "below") reasons.push({ t: "pass", x: "Level: trading below prior-day value (VAL) — bearish acceptance backdrop." });
+    else reasons.push({ t: "warn", x: "Level: inside prior-day value — balance/rotational; extremes tend to fade toward POC." });
+  }
+
+  // ---- BIAS score (+ bullish / - bearish) ----
+  let score = 0;
+  if (b.structure === "up") score += 2; else if (b.structure === "down") score -= 2;
+  if (b.oi === "put") score += 1.5; else if (b.oi === "call") score -= 1.5;
+  if (b.momentum === "bull") score += 1.5; else if (b.momentum === "bear") score -= 1.5;
+  if (m) {
+    if (m.vwap === "above") score += 1; else if (m.vwap === "below") score -= 1;
+    if (m.pdValue === "above") score += 1.5; else if (m.pdValue === "below") score -= 1.5;
+    if (m.ib === "above") score += 1; else if (m.ib === "below") score -= 1;
+    if (m.pwValue === "above") score += 0.5; else if (m.pwValue === "below") score -= 0.5;
+  }
+  if (c.cue === "up") score += 1; else if (c.cue === "mildup") score += 0.5;
+  else if (c.cue === "down") score -= 1; else if (c.cue === "milddown") score -= 0.5;
+
+  // options positioning (optional)
+  const od = A.bias.optionsData || {};
+  const hasPCR = typeof od.pcr === "number" && !isNaN(od.pcr);
+  const hasMP = typeof od.maxpain === "number" && !isNaN(od.maxpain);
+  if (hasPCR) {
+    if (od.pcr >= 1.3) score += 1.5; else if (od.pcr >= 1.1) score += 0.75;
+    else if (od.pcr <= 0.7) score -= 1.5; else if (od.pcr <= 0.9) score -= 0.75;
+  }
+  let mpInfo = null;
+  if (hasMP && L && typeof L.price === "number") {
+    const thr = Math.max(10, L.price * 0.001);
+    const diff = L.price - od.maxpain;
+    const pinned = Math.abs(diff) < thr;
+    const w = c.expiry === "yes" ? 1.5 : 1; // pull is strongest near expiry
+    if (!pinned) score += diff > 0 ? -w : w; // gravity toward max pain
+    mpInfo = { pinned, diff, w };
+  }
+
+  let bias, biasDir;
+  if (score >= 3) { bias = "Bullish"; biasDir = "bull"; }
+  else if (score <= -3) { bias = "Bearish"; biasDir = "bear"; }
+  else { bias = "Neutral / unclear"; biasDir = "neutral"; }
+
+  if (biasDir === "neutral") { reasons.push({ t: "fail", x: `Bias: signals conflict (score ${score.toFixed(1)}) — no directional edge for intraday option buying.` }); hardFail = true; }
+  else { reasons.push({ t: "pass", x: `Bias: ${bias} (score ${score.toFixed(1)}) — structure, OI, momentum, VWAP and value acceptance broadly agree.` }); }
+
+  if (hasPCR) {
+    const tilt = od.pcr >= 1.1 ? "put-heavy → bullish tilt" : od.pcr <= 0.9 ? "call-heavy → bearish tilt" : "balanced → neutral";
+    reasons.push({ t: od.pcr >= 1.1 || od.pcr <= 0.9 ? "pass" : "warn", x: `Bias: PCR ${od.pcr} — ${tilt}.` });
+  }
+  if (mpInfo) {
+    const txt = mpInfo.pinned
+      ? `spot pinned near max pain ${od.maxpain} — expect chop/pinning, beware directional trades`
+      : (mpInfo.diff > 0 ? `spot above max pain ${od.maxpain} — downward pull toward it` : `spot below max pain ${od.maxpain} — upward pull toward it`) + (c.expiry === "yes" ? " (strong on expiry)" : "");
+    reasons.push({ t: "warn", x: `Bias: ${txt}.` });
+  } else if (hasMP) {
+    reasons.push({ t: "warn", x: `Bias: max pain ${od.maxpain} entered, but enter current spot in the Level stage to use it.` });
+  }
+
+  // ---- LEVEL ↔ BIAS confluence ----
+  let aligned = false, strategy = null, action = "—";
+  if (biasDir === "bull") {
+    if (loc === "support") { aligned = true; action = "Long via Call (CE)"; strategy = "Bounce long: buy CE / bull-call spread as support holds. SL just below the reference, target VWAP/POC → next VA edge."; }
+    else if (loc === "breakup") { aligned = true; action = "Long via Call (CE) on retest"; strategy = "Breakout long: buy CE on a successful retest of the broken level. SL below the retest, target the next reference above."; }
+    else if (loc === "resistance") { reasons.push({ t: "fail", x: "Conflict: bullish bias but price is INTO resistance — chasing into a wall. Wait for a break + retest." }); hardFail = true; }
+    else if (loc === "breakdown") { reasons.push({ t: "fail", x: "Conflict: bullish bias but price broke DOWN — bias and level disagree. Stand aside." }); hardFail = true; }
+  } else if (biasDir === "bear") {
+    if (loc === "resistance") { aligned = true; action = "Short via Put (PE)"; strategy = "Rejection short: buy PE / bear-put spread as resistance rejects. SL just above the reference, target VWAP/POC → next VA edge."; }
+    else if (loc === "breakdown") { aligned = true; action = "Short via Put (PE) on retest"; strategy = "Breakdown short: buy PE on a failed retest of the broken level. SL above the retest, target the next reference below."; }
+    else if (loc === "support") { reasons.push({ t: "fail", x: "Conflict: bearish bias but price is INTO support — shorting into a floor. Wait for a break + retest." }); hardFail = true; }
+    else if (loc === "breakup") { reasons.push({ t: "fail", x: "Conflict: bearish bias but price broke UP — bias and level disagree. Stand aside." }); hardFail = true; }
+  }
+  if (aligned) reasons.push({ t: "pass", x: "Confluence: bias and level agree — the trade pulls in one direction." });
+
+  // ---- RISK / R:R gate ----
+  if (s.rr === "no") { reasons.push({ t: "fail", x: "Risk: no clean stop or poor reward-to-risk. A trade you can't define is a trade you skip." }); hardFail = true; }
+  else if (s.rr === "tight") { reasons.push({ t: "warn", x: "Risk: R:R only ~1:1 — thin edge; take only on high conviction or reduce size." }); softWarn = true; }
+  else { reasons.push({ t: "pass", x: "Risk: clean invalidation with R:R ≥ 1:2 — the math supports the trade." }); }
+  if (s.conviction === "low") { reasons.push({ t: "warn", x: "Discipline: you flagged low conviction / forcing it — that alone is a reason to pass." }); softWarn = true; }
+
+  // ---- FINAL verdict ----
+  let verdict, vClass, vSub;
+  if (hardFail) { verdict = "NO-GO"; vClass = "no"; vSub = "One or more non-negotiable conditions failed. Protect capital — wait for a cleaner setup."; }
+  else if (softWarn || s.rr === "tight" || s.conviction !== "high") { verdict = "WAIT / SMALL"; vClass = "wait"; vSub = "Setup is valid but not clean. If you act: reduce size, tighten management, or wait for one more confirmation."; }
+  else { verdict = "GO"; vClass = "go"; vSub = "Context, level, bias and risk all align. Execute the plan and manage to your stop."; }
+
+  // strategy tweaks
+  let notes = [];
+  if (aligned) {
+    if (m && m.nearest) notes.push(`Reference levels for management — nearest: ${m.nearest.k} (${Math.round(m.nearest.v)}). Use POC / VA edges / IBH-IBL as targets and stops.`);
+    if (c.expiry === "yes") notes.push("Expiry day: theta is brutal — prefer ATM/slightly-ITM strikes, scalp, and don't hold losers hoping.");
+    if (c.vix === "high" || c.vix === "elevated") notes.push("Higher VIX: premiums are inflated — consider a spread (buy + sell) to cut cost and define risk.");
+    if (c.vix === "vlow") notes.push("Low VIX: cheap premium but small expected move — keep targets realistic.");
+    if (m && m.pdValue === "inside") notes.push("Inside prior-day value: balance conditions — fade VA edges toward POC rather than expecting a big trend.");
+    if (m && m.confluence === "strong") notes.push("Strong confluence justifies a slightly larger (but still planned) size.");
+  }
+
+  return { verdict, vClass, vSub, reasons, ctxState, lvlState, bias, action, strategy, notes, score, m };
+}
+
+function labelOf(stageId, qId, val) {
+  const st = STAGES.find(s => s.id === stageId);
+  const q = st.questions.find(q => q.id === qId);
+  const o = q.opts.find(o => o.v === val);
+  return o ? o.t : val;
+}
+
+function renderResult() {
+  renderProgress();
+  const r = evaluate();
+  let html = `<div class="verdict ${r.vClass}">
+    <div class="big">${r.verdict}</div>
+    <div class="sub">${r.vSub}</div>
+  </div>`;
+
+  html += `<div class="summary">
+    <div class="sumcard ctx"><div class="k">Context</div><div class="v">${r.ctxState}</div></div>
+    <div class="sumcard lvl"><div class="k">Level</div><div class="v">${r.lvlState}</div></div>
+    <div class="sumcard bias"><div class="k">Bias</div><div class="v">${r.bias}</div></div>
+    <div class="sumcard strat"><div class="k">Action</div><div class="v">${r.action}</div></div>
+  </div>`;
+
+  if (r.m) html += renderLevelRead(A.level.levels);
+  if (hasOptionsData()) html += renderOptionsRead();
+
+  if (r.strategy && r.vClass !== "no") {
+    html += `<div class="block"><h4>📋 Suggested play</h4><ul><li>${r.strategy}</li>`;
+    r.notes.forEach(n => html += `<li>${n}</li>`);
+    html += `</ul></div>`;
+  }
+
+  html += `<div class="block"><h4>🧭 Why this verdict</h4><ul>`;
+  r.reasons.forEach(rr => {
+    const cls = rr.t === "pass" ? "reason-pass" : rr.t === "fail" ? "reason-fail" : "reason-warn";
+    html += `<li class="${cls}">${rr.x}</li>`;
+  });
+  html += `</ul></div>`;
+
+  html += `<div class="nav">
+    <button class="btn-ghost" id="backBtn">← Edit inputs</button>
+    <button class="btn-primary" id="restartBtn">↻ New assessment</button>
+  </div>`;
+
+  app.innerHTML = html;
+  document.getElementById("backBtn").addEventListener("click", () => { stageIdx = STAGES.length - 1; renderStage(); });
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    STAGES.forEach(s => A[s.id] = {});
+    stageIdx = 0; renderStage();
+  });
+}
+
+document.getElementById("toggleFlow").addEventListener("click", e => {
+  const map = document.getElementById("flowMap");
+  const hidden = map.style.display === "none";
+  map.style.display = hidden ? "flex" : "none";
+  e.target.textContent = hidden ? "Hide framework map ▲" : "Show framework map ▼";
+});
+
+renderStage();
+</script>
+</body>
+</html>
