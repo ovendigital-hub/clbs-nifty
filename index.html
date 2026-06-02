@@ -190,6 +190,7 @@
 <header>
   <h1>CLBS FRAMEWORK</h1>
   <p>Context → Level → Bias → Strategy · Intraday Nifty Options Decision Engine</p>
+  <p style="font-size:.78rem;color:var(--muted);margin-top:4px">All price / VWAP / value-area inputs use <b>Nifty Futures</b> (which has volume) — not spot.</p>
 </header>
 
 <div class="wrap">
@@ -286,12 +287,12 @@ const STAGES = [
     id: "level", label: "L · Level", title: "Level — where is price vs the map?",
     questions: [
       { id: "levels", type: "numgroup",
-        label: "Key reference levels",
-        hint: "Enter Nifty index values. The read below updates automatically.",
+        label: "Key reference levels (Nifty Futures)",
+        hint: "Enter Nifty Futures values (futures has volume; spot does not). Daily levels stay saved — you only re-enter what changed.",
         groups: [
-          { title: "Live", fields: [
-            { id: "price", t: "Current Nifty spot" },
-            { id: "vwap",  t: "VWAP (current)" },
+          { title: "Live (Nifty Futures)", fields: [
+            { id: "price", t: "Futures price (LTP)" },
+            { id: "vwap",  t: "Futures VWAP (current)" },
           ] },
           { title: "Initial Balance (first hour)", fields: [
             { id: "ibh", t: "IB High (IBH)" },
@@ -301,6 +302,8 @@ const STAGES = [
             { id: "pdPOC", t: "Prev-day POC" },
             { id: "pdVAH", t: "Prev-day VAH" },
             { id: "pdVAL", t: "Prev-day VAL" },
+            { id: "pdHigh", t: "Prev-day High (PDH) — optional", opt: true },
+            { id: "pdLow",  t: "Prev-day Low (PDL) — optional", opt: true },
           ] },
           { title: "Previous Week profile", fields: [
             { id: "pwPOC", t: "Prev-week POC" },
@@ -340,9 +343,16 @@ const STAGES = [
           { v: "bear", t: "Bearish — strong red push", s: "" },
           { v: "flat", t: "Flat / indecisive", s: "" },
         ] },
+      { id: "volume", label: "Volume on the move (Nifty Futures, vs typical for this time)",
+        hint: "Futures volume confirms moves. Low volume warns of false breaks.",
+        opts: [
+          { v: "high", t: "High / expanding (≈ >1.5× normal)", s: "Strong participation — confirms the move" },
+          { v: "normal", t: "Normal (≈ average)", s: "No special signal" },
+          { v: "low", t: "Low / drying up (≈ <0.7× normal)", s: "Weak participation — moves may fail" },
+        ] },
       { id: "optionsData", type: "numgroup", optional: true,
         label: "Options positioning (optional)",
-        hint: "Leave blank to skip. Max-pain compares against your spot from the Level stage.",
+        hint: "Leave blank to skip. Max-pain compares against the futures price from the Level stage.",
         groups: [
           { title: "Sentiment", fields: [
             { id: "pcr", t: "PCR (Put/Call OI ratio)" },
@@ -375,6 +385,15 @@ const A = {};
 STAGES.forEach(s => A[s.id] = {});
 let stageIdx = 0;
 
+/* ---- daily level persistence (so you don't re-enter VAH/POC/PDH etc each time) ---- */
+const LKEY = "clbs_daily_levels_v1";
+function todayStr() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function prettyDate(s) { try { return new Date(s+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"}); } catch(e){ return s; } }
+function saveDailyLevels() { try { localStorage.setItem(LKEY, JSON.stringify({ date: todayStr(), levels: A.level.levels || {} })); } catch(e){} }
+function loadDailyLevels() { try { const s = JSON.parse(localStorage.getItem(LKEY)); if (s && s.levels) { A.level.levels = s.levels; return s; } } catch(e){} return null; }
+function clearDailyLevels() { try { localStorage.removeItem(LKEY); } catch(e){} A.level.levels = {}; }
+let savedLevelsMeta = loadDailyLevels(); // pre-fill inputs from last save
+
 const app = document.getElementById("app");
 const progressEl = document.getElementById("progress");
 
@@ -402,6 +421,7 @@ function computeLevelMap(L) {
   const refs = [
     { k: "VWAP", v: L.vwap }, { k: "IBH", v: L.ibh }, { k: "IBL", v: L.ibl },
     { k: "pd POC", v: L.pdPOC }, { k: "pd VAH", v: L.pdVAH }, { k: "pd VAL", v: L.pdVAL },
+    { k: "PDH", v: L.pdHigh }, { k: "PDL", v: L.pdLow },
     { k: "pw POC", v: L.pwPOC }, { k: "pw VAH", v: L.pwVAH }, { k: "pw VAL", v: L.pwVAL },
   ].filter(r => typeof r.v === "number" && !isNaN(r.v));
 
@@ -445,7 +465,7 @@ function chip(text, tone) { return `<span class="chip ${tone||'neu'}">${text}</s
 
 function renderLevelRead(L) {
   const m = computeLevelMap(L);
-  if (!m) return `<div class="block"><h4>📍 Computed location read</h4><p style="color:var(--muted);margin:0">Enter at least the current spot to see the read.</p></div>`;
+  if (!m) return `<div class="block"><h4>📍 Computed location read</h4><p style="color:var(--muted);margin:0">Enter at least the futures price to see the read.</p></div>`;
   const toneVal = (st) => st === "above" ? "bull" : st === "below" ? "bear" : "neu";
   const lblVal = (st) => st === "above" ? "above value" : st === "below" ? "below value" : "inside value";
   let html = `<div class="block"><h4>📍 Computed location read</h4><div class="chips">`;
@@ -482,10 +502,10 @@ function renderOptionsRead() {
       const diff = spot - od.maxpain;
       const pinned = Math.abs(diff) < thr;
       const t = pinned ? "neu" : diff > 0 ? "bear" : "bull";
-      const lbl = pinned ? "spot pinned at max pain → expect chop" : diff > 0 ? "spot above max pain → downward pull" : "spot below max pain → upward pull";
+      const lbl = pinned ? "price pinned at max pain → expect chop" : diff > 0 ? "price above max pain → downward pull" : "price below max pain → upward pull";
       chips.push(chip(`Max Pain ${od.maxpain}: <b>${lbl}</b>`, t));
     } else {
-      chips.push(chip(`Max Pain ${od.maxpain}: <b>enter spot in Level stage to compare</b>`, "neu"));
+      chips.push(chip(`Max Pain ${od.maxpain}: <b>enter futures price in Level stage to compare</b>`, "neu"));
     }
   }
   if (!chips.length) return `<div class="block"><h4>🧮 Options read</h4><p style="margin:0;color:var(--muted)">Optional — enter PCR and/or Max Pain to factor positioning into the bias.</p></div>`;
@@ -497,7 +517,7 @@ function questionAnswered(stage, q) {
     if (q.optional) return true;
     const obj = A[stage.id][q.id];
     if (!obj) return false;
-    return q.groups.every(g => g.fields.every(f => typeof obj[f.id] === "number" && !isNaN(obj[f.id]) && obj[f.id] > 0));
+    return q.groups.every(g => g.fields.every(f => f.opt || (typeof obj[f.id] === "number" && !isNaN(obj[f.id]) && obj[f.id] > 0)));
   }
   return A[stage.id][q.id] != null;
 }
@@ -549,6 +569,11 @@ function renderStage() {
 
     if (q.type === "numgroup") {
       const obj = A[stage.id][q.id] || {};
+      if (q.id === "levels" && savedLevelsMeta) {
+        html += `<div class="block" style="margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <span style="font-size:.85rem;color:var(--muted)">💾 Daily levels saved (${prettyDate(savedLevelsMeta.date)}) — only re-enter what changed.</span>
+          <button id="clearLevels" class="btn-ghost" style="padding:5px 11px;font-size:.8rem">Clear</button></div>`;
+      }
       html += `<div class="numgrid">`;
       q.groups.forEach(g => {
         html += `<div class="group-title">${g.title}</div>`;
@@ -576,6 +601,13 @@ function renderStage() {
 
   bindRadiosIn(app);
 
+  const clearBtn = document.getElementById("clearLevels");
+  if (clearBtn) clearBtn.addEventListener("click", () => {
+    if (confirm("Clear the saved daily levels? You'll re-enter them for a new day.")) {
+      clearDailyLevels(); savedLevelsMeta = null; A.level._reactionManual = false; renderStage();
+    }
+  });
+
   // number handlers (no full re-render — keep focus; just update reads + dependents)
   app.querySelectorAll("input[type=number]").forEach(inp => {
     inp.addEventListener("input", e => {
@@ -585,6 +617,7 @@ function renderStage() {
       A[sid][qid][fid] = raw === "" ? undefined : parseFloat(raw);
 
       if (sid === "level") {
+        saveDailyLevels();
         const readEl = document.getElementById("levelRead");
         if (readEl) readEl.innerHTML = renderLevelRead(A.level.levels);
         if (!A.level._reactionManual) {
@@ -684,6 +717,9 @@ function evaluate() {
     mpInfo = { pinned, diff, w };
   }
 
+  // volume reinforces the prevailing directional lean (futures volume = real participation)
+  if (b.volume === "high" && Math.abs(score) >= 1) score += score > 0 ? 1 : -1;
+
   let bias, biasDir;
   if (score >= 3) { bias = "Bullish"; biasDir = "bull"; }
   else if (score <= -3) { bias = "Bearish"; biasDir = "bear"; }
@@ -698,11 +734,24 @@ function evaluate() {
   }
   if (mpInfo) {
     const txt = mpInfo.pinned
-      ? `spot pinned near max pain ${od.maxpain} — expect chop/pinning, beware directional trades`
-      : (mpInfo.diff > 0 ? `spot above max pain ${od.maxpain} — downward pull toward it` : `spot below max pain ${od.maxpain} — upward pull toward it`) + (c.expiry === "yes" ? " (strong on expiry)" : "");
+      ? `price pinned near max pain ${od.maxpain} — expect chop/pinning, beware directional trades`
+      : (mpInfo.diff > 0 ? `price above max pain ${od.maxpain} — downward pull toward it` : `price below max pain ${od.maxpain} — upward pull toward it`) + (c.expiry === "yes" ? " (strong on expiry)" : "");
     reasons.push({ t: "warn", x: `Bias: ${txt}.` });
   } else if (hasMP) {
-    reasons.push({ t: "warn", x: `Bias: max pain ${od.maxpain} entered, but enter current spot in the Level stage to use it.` });
+    reasons.push({ t: "warn", x: `Bias: max pain ${od.maxpain} entered, but enter the futures price in the Level stage to use it.` });
+  }
+
+  // ---- volume confirmation ----
+  if (b.volume === "high") {
+    reasons.push({ t: "pass", x: "Volume: high / expanding on the futures — strong participation confirms the move." });
+  } else if (b.volume === "low") {
+    if (loc === "breakup" || loc === "breakdown") {
+      reasons.push({ t: "fail", x: "Volume: a breakout on LOW futures volume — high false-breakout risk. Demand volume or stand aside." });
+      hardFail = true;
+    } else {
+      reasons.push({ t: "warn", x: "Volume: thin / drying up — weak participation; moves may stall. Trade lighter or wait." });
+      softWarn = true;
+    }
   }
 
   // ---- LEVEL ↔ BIAS confluence ----
@@ -793,6 +842,7 @@ function renderResult() {
   document.getElementById("backBtn").addEventListener("click", () => { stageIdx = STAGES.length - 1; renderStage(); });
   document.getElementById("restartBtn").addEventListener("click", () => {
     STAGES.forEach(s => A[s.id] = {});
+    savedLevelsMeta = loadDailyLevels(); // keep today's reference levels pre-filled
     stageIdx = 0; renderStage();
   });
 }
