@@ -126,6 +126,11 @@
     grid-column: 1 / -1; font-size: 0.78rem; text-transform: uppercase;
     letter-spacing: 1px; color: var(--muted); margin: 6px 0 -4px;
   }
+  .numgrid .group-title.hl {
+    color: var(--accent); font-weight: 700; letter-spacing: 0.5px;
+    background: rgba(255,209,102,0.08); border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0; padding: 7px 10px; margin: 12px 0 2px;
+  }
   .numfield label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
   .numfield input {
     width: 100%; padding: 9px 10px; font-size: 0.95rem; font-family: inherit;
@@ -424,6 +429,18 @@ const STAGES = [
         label: "Key reference levels (Nifty Futures)",
         hint: "Enter Nifty Futures values (futures has volume; spot does not). Daily levels stay saved — you only re-enter what changed.",
         groups: [
+          { title: "★ PIVOT BOSS · Prior-day (Day 2) H / L / C — plots CPR & Floor Pivots below", hl: true, fields: [
+            { id: "pdHigh", t: "Prev-day High (PDH)", opt: true },
+            { id: "pdLow",  t: "Prev-day Low (PDL)", opt: true },
+            { id: "pdClose", t: "Prev-day Close", opt: true },
+          ] },
+          { title: "★ PIVOT BOSS · Day 1 (session before Day 2) — optional, for the 2-day regime", hl: true, fields: [
+            { id: "dbVAH", t: "Day-1 VAH — value-area regime", opt: true },
+            { id: "dbVAL", t: "Day-1 VAL — value-area regime", opt: true },
+            { id: "dbHigh", t: "Day-1 High — 2-day CPR regime", opt: true },
+            { id: "dbLow",  t: "Day-1 Low — 2-day CPR regime", opt: true },
+            { id: "dbClose", t: "Day-1 Close — 2-day CPR regime", opt: true },
+          ] },
           { title: "Live (Nifty Futures)", fields: [
             { id: "price", t: "Futures price (LTP)" },
             { id: "vwap",  t: "Futures VWAP (current session)" },
@@ -433,25 +450,15 @@ const STAGES = [
             { id: "ibh", t: "IB High (IBH)" },
             { id: "ibl", t: "IB Low (IBL)" },
           ] },
-          { title: "Previous Day profile — “Day 2” (most recent session)", fields: [
+          { title: "Previous Day value area — “Day 2” (most recent session)", fields: [
             { id: "pdPOC", t: "Prev-day POC" },
             { id: "pdVAH", t: "Prev-day VAH (Day-2 value high)" },
             { id: "pdVAL", t: "Prev-day VAL (Day-2 value low)" },
-            { id: "pdHigh", t: "Prev-day High (PDH) — for CPR/pivots", opt: true },
-            { id: "pdLow",  t: "Prev-day Low (PDL) — for CPR/pivots", opt: true },
-            { id: "pdClose", t: "Prev-day Close — for CPR/pivots", opt: true },
           ] },
           { title: "Previous Week profile", fields: [
             { id: "pwPOC", t: "Prev-week POC" },
             { id: "pwVAH", t: "Prev-week VAH" },
             { id: "pwVAL", t: "Prev-week VAL" },
-          ] },
-          { title: "Pivot Boss — “Day 1” (session before Day 2) · optional, for 2-day regime", fields: [
-            { id: "dbVAH", t: "Day-1 VAH — value-area regime", opt: true },
-            { id: "dbVAL", t: "Day-1 VAL — value-area regime", opt: true },
-            { id: "dbHigh", t: "Day-1 High — 2-day CPR regime", opt: true },
-            { id: "dbLow",  t: "Day-1 Low — 2-day CPR regime", opt: true },
-            { id: "dbClose", t: "Day-1 Close — 2-day CPR regime", opt: true },
           ] },
         ] },
       { id: "reaction", label: "How is price reacting at the level it's testing?",
@@ -768,24 +775,35 @@ function renderLevelRead(L) {
 }
 
 function renderPivotRead(L) {
-  const m = computeLevelMap(L);
-  if (!m || !m.pivots) {
-    return `<div class="block"><h4>🧭 Pivot Boss — CPR, Floor Pivots &amp; Regime</h4>
-      <p style="margin:0;color:var(--muted)">Enter prior-day <b>High, Low &amp; Close</b> in the Level stage to plot the Central Pivot Range and floor pivots (R1–R4 / S1–S4). Add the <b>Day-1</b> value area &amp; H/L/C to read the two-day regime.</p></div>`;
+  const pv = getPivots(L);
+  if (!pv) {
+    return `<div class="block" style="border:1px dashed var(--line)"><h4>🧭 Pivot Boss — CPR, Floor Pivots &amp; Regime</h4>
+      <p style="margin:0;color:var(--muted)">Enter the prior-day <b>High, Low &amp; Close</b> in the highlighted box above to plot the Central Pivot Range and floor pivots (R1–R4 / S1–S4). Add the <b>Day-1</b> value area &amp; H/L/C for the two-day regime.</p></div>`;
   }
-  const pv = m.pivots, cpr = m.cpr, loc = m.cprLoc;
-  const locTone = loc === "above" ? "bull" : loc === "below" ? "bear" : "neu";
-  const locLbl = loc === "above" ? "above CPR (bullish)" : loc === "below" ? "below CPR (bearish)" : "inside CPR (rotational)";
+  const price = (L && typeof L.price === "number" && !isNaN(L.price)) ? L.price : null;
+  const cpr = classifyCprWidth(pv, price || pv.pivot);
+  const loc = price == null ? null : (price > pv.top ? "above" : price < pv.bottom ? "below" : "inside");
+  const prevPv = getPrevPivots(L);
+  const cprRel = prevPv ? twoDayRelationship({ top: pv.top, bottom: pv.bottom }, { top: prevPv.top, bottom: prevPv.bottom }, price || 0, "CPR") : null;
+  const vaRel = (typeof L.pdVAH === "number" && typeof L.pdVAL === "number" && typeof L.dbVAH === "number" && typeof L.dbVAL === "number")
+    ? twoDayRelationship({ top: L.pdVAH, bottom: L.pdVAL }, { top: L.dbVAH, bottom: L.dbVAL }, price || 0, "value area") : null;
+
   const widthTone = cpr.type === "narrow" ? "bull" : cpr.type === "wide" ? "bear" : "neu";
   const regTone = r => r.bias === "bull" ? "bull" : r.bias === "bear" ? "bear" : "neu";
   let h = `<div class="block"><h4>🧭 Pivot Boss — CPR, Floor Pivots &amp; Regime</h4><div class="chips">`;
-  h += chip(`Price vs CPR: <b>${locLbl}</b>`, locTone);
-  h += chip(`CPR width: <b>${Math.round(cpr.widthPts)} pts · ${cpr.pct.toFixed(2)}%</b>`, widthTone);
+  if (loc) {
+    const locTone = loc === "above" ? "bull" : loc === "below" ? "bear" : "neu";
+    const locLbl = loc === "above" ? "above CPR (bullish)" : loc === "below" ? "below CPR (bearish)" : "inside CPR (rotational)";
+    h += chip(`Price vs CPR: <b>${locLbl}</b>`, locTone);
+  } else {
+    h += chip(`Price vs CPR: <b>enter Futures price (LTP)</b>`, "neu");
+  }
+  h += chip(`CPR width: <b>${Math.round(cpr.widthPts)} pts${price ? " · " + cpr.pct.toFixed(2) + "%" : ""}</b>`, widthTone);
   h += chip(`<b>${cpr.dayType}</b>`, widthTone);
-  if (m.vaRel) h += chip(`2-day VA: <b>${m.vaRel.regime}</b> (${m.vaRel.type})`, regTone(m.vaRel));
-  if (m.cprRel) h += chip(`2-day CPR: <b>${m.cprRel.regime}</b> (${m.cprRel.type})`, regTone(m.cprRel));
+  if (vaRel) h += chip(`2-day VA: <b>${vaRel.regime}</b> (${vaRel.type})`, regTone(vaRel));
+  if (cprRel) h += chip(`2-day CPR: <b>${cprRel.regime}</b> (${cprRel.type})`, regTone(cprRel));
   h += `</div>`;
-  h += `<div class="pivot-ladder">${pivotLadderRows(pv, L.price)}</div>`;
+  h += `<div class="pivot-ladder">${pivotLadderRows(pv, price)}</div>`;
   h += `<p style="margin:8px 0 0;font-size:0.78rem;color:var(--muted)">CPR &amp; Floor Pivots per Frank Ochoa, <i>Secrets of a Pivot Boss</i>. CPR band shaded; “← price” marks the nearest pivot. Width day-type is a heuristic — strongest at clear extremes.</p>`;
   h += `</div>`;
   return h;
@@ -902,7 +920,7 @@ function renderStage() {
       }
       html += `<div class="numgrid">`;
       q.groups.forEach(g => {
-        html += `<div class="group-title">${g.title}</div>`;
+        html += `<div class="group-title${g.hl ? " hl" : ""}">${g.title}</div>`;
         g.fields.forEach(f => {
           const val = typeof obj[f.id] === "number" ? obj[f.id] : "";
           html += `<div class="numfield"><label>${f.t}</label>
@@ -910,7 +928,7 @@ function renderStage() {
         });
       });
       html += `</div>`;
-      if (q.id === "levels") html += `<div id="levelRead">${renderLevelRead(A.level.levels)}</div><div id="pivotRead">${renderPivotRead(A.level.levels)}</div>`;
+      if (q.id === "levels") html += `<div id="pivotRead">${renderPivotRead(A.level.levels)}</div><div id="levelRead">${renderLevelRead(A.level.levels)}</div>`;
       if (q.id === "optionsData") html += `<div id="optionsRead">${renderOptionsRead()}</div>`;
     } else {
       const isReaction = q.id === "reaction";
