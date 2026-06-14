@@ -184,6 +184,136 @@
 
   .disclaimer { margin-top: 24px; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
   .toggle-flow { background: transparent; color: var(--muted); border: 1px solid var(--line); font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; margin-bottom: 12px; }
+
+  /* ---- View switcher (results) ---- */
+  .view-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .view-tab {
+    font-family: inherit; font-size: 0.82rem; font-weight: 600;
+    padding: 8px 14px; border-radius: 20px; cursor: pointer;
+    background: var(--panel2); color: var(--muted); border: 1px solid var(--line);
+  }
+  .view-tab.active { background: var(--accent); color: #0f1424; border-color: var(--accent); }
+  .result-pane { display: none; }
+  .result-pane.active { display: block; }
+
+  /* ---- Score hero ---- */
+  .score-hero {
+    display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px;
+    background: linear-gradient(135deg, var(--panel) 0%, var(--panel2) 100%);
+    border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-bottom: 18px;
+  }
+  @media (max-width: 640px) { .score-hero { grid-template-columns: 1fr; } }
+  .score-ring-wrap { text-align: center; }
+  .score-ring {
+    width: 140px; height: 140px; margin: 0 auto 8px; border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 4px solid var(--line); background: var(--bg);
+  }
+  .score-ring .num { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+  .score-ring .lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .score-ring.bull { border-color: var(--go); box-shadow: 0 0 24px rgba(46,204,113,0.25); }
+  .score-ring.bull .num { color: var(--go); }
+  .score-ring.bear { border-color: var(--no); box-shadow: 0 0 24px rgba(255,92,108,0.2); }
+  .score-ring.bear .num { color: var(--no); }
+  .score-ring.neu { border-color: var(--wait); }
+  .score-ring.neu .num { color: var(--wait); }
+  .score-meter { height: 10px; border-radius: 5px; background: var(--bg); margin: 10px 0 6px; position: relative; overflow: hidden; }
+  .score-meter .fill { height: 100%; border-radius: 5px; transition: width .3s; }
+  .score-meter .zones {
+    position: absolute; inset: 0; display: flex; font-size: 0.65rem; color: var(--muted);
+  }
+  .score-meter .zones span { flex: 1; text-align: center; padding-top: 12px; }
+  .verdict-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item {
+    display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem;
+    padding: 8px 10px; border-radius: 8px; background: var(--bg);
+  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .legend-dot.go { background: var(--go); }
+  .legend-dot.wait { background: var(--wait); }
+  .legend-dot.no { background: var(--no); }
+
+  .verdict-banner {
+    text-align: center; padding: 20px 18px; border-radius: 14px; margin-bottom: 16px;
+  }
+  .verdict-banner.go { background: rgba(46,204,113,0.14); border: 2px solid var(--go); }
+  .verdict-banner.wait { background: rgba(244,183,64,0.12); border: 2px solid var(--wait); }
+  .verdict-banner.no { background: rgba(255,92,108,0.1); border: 2px solid var(--no); }
+  .verdict-banner .big { font-size: 1.85rem; font-weight: 800; letter-spacing: 1px; }
+  .verdict-banner.go .big { color: var(--go); }
+  .verdict-banner.wait .big { color: var(--wait); }
+  .verdict-banner.no .big { color: var(--no); }
+  .verdict-banner .tagline { font-size: 0.95rem; margin-top: 6px; color: var(--text); }
+  .verdict-banner .sub { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+
+  .trade-card {
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 16px;
+  }
+  .trade-card .head {
+    padding: 12px 16px; font-weight: 700; font-size: 0.9rem;
+    background: var(--panel2); border-bottom: 1px solid var(--line);
+  }
+  .trade-card.go .head { color: var(--go); }
+  .trade-card.pending .head { color: var(--wait); }
+  .trade-row {
+    display: grid; grid-template-columns: 100px 1fr; gap: 8px;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 0.9rem;
+  }
+  .trade-row:last-child { border-bottom: none; }
+  .trade-row .k { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .trade-row .v b { color: var(--accent); }
+  .watch-grid { display: grid; gap: 12px; }
+  @media (min-width: 600px) { .watch-grid.two { grid-template-columns: 1fr 1fr; } }
+  .watch-box {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+  }
+  .watch-box h5 { margin: 0 0 8px; font-size: 0.88rem; }
+  .watch-box.bull h5 { color: var(--go); }
+  .watch-box.bear h5 { color: var(--no); }
+  .watch-box ul { margin: 0; padding-left: 18px; font-size: 0.86rem; }
+  .watch-box li { margin: 5px 0; }
+  .tf-badge {
+    display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
+    padding: 3px 8px; border-radius: 6px; background: var(--panel2); color: var(--accent);
+    border: 1px solid var(--line); margin-right: 6px;
+  }
+
+  .strategy-gate {
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+    border: 2px solid var(--line); background: var(--panel);
+  }
+  .strategy-gate.go { border-color: var(--go); background: rgba(46,204,113,0.08); }
+  .strategy-gate.wait { border-color: var(--wait); background: rgba(244,183,64,0.08); }
+  .strategy-gate.no { border-color: var(--no); background: rgba(255,92,108,0.06); }
+  .strategy-gate .sg-status {
+    font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .strategy-gate.go .sg-status { color: var(--go); }
+  .strategy-gate.wait .sg-status { color: var(--wait); }
+  .strategy-gate.no .sg-status { color: var(--no); }
+  .strategy-gate .sg-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; }
+  .strategy-gate .sg-head { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .strategy-preview {
+    margin-top: 16px; padding: 14px 16px; border-radius: 12px;
+    border: 1px dashed var(--line); background: rgba(255,209,102,0.05);
+  }
+  .strategy-preview h4 { margin: 0 0 8px; font-size: 0.88rem; color: var(--accent); }
+
+  /* ---- Pivot Boss: CPR & Floor Pivot ladder ---- */
+  .pivot-ladder { margin-top: 12px; display: flex; flex-direction: column; gap: 3px; }
+  .piv-row {
+    display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 8px;
+    padding: 5px 10px; border-radius: 7px; font-size: 0.86rem;
+    background: var(--bg); border: 1px solid transparent;
+  }
+  .piv-row .piv-k { font-weight: 700; color: var(--muted); font-size: 0.78rem; letter-spacing: 0.5px; }
+  .piv-row .piv-v { font-variant-numeric: tabular-nums; }
+  .piv-row.piv-r .piv-k { color: var(--no); }
+  .piv-row.piv-s .piv-k { color: var(--go); }
+  .piv-row.piv-c { background: rgba(177,151,252,0.10); }
+  .piv-row.piv-c .piv-k { color: var(--lvl); }
+  .piv-row.near { border-color: var(--accent); background: rgba(255,209,102,0.10); }
+  .piv-row .piv-tag { font-size: 0.72rem; color: var(--accent); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -217,8 +347,8 @@
     <div class="arrow">→</div>
     <div class="node strat">
       <span class="tag">S · Strategy</span>
-      <h3>Does it line up + pay?</h3>
-      <p>Level–Bias confluence, instrument choice, R:R ≥ 1:2 → GO / WAIT / NO-GO.</p>
+      <h3>When & how to enter?</h3>
+      <p>Timeframe + candlestick at the level → system maps crossing triggers, SL & target from your level map.</p>
     </div>
   </div>
 
@@ -231,6 +361,10 @@
     outcomes, or constitute a recommendation to buy or sell any security. Options trading carries a
     high risk of loss. Thresholds (VIX bands, time windows, R:R) are configurable rules of thumb, not
     rules of the market. Trade your own plan and risk responsibly.
+    <br><br>The Central Pivot Range, Floor Pivots, CPR-width day-type forecasting and the seven two-day
+    value-area / CPR relationships are based on concepts from Frank Ochoa's <i>Secrets of a Pivot Boss</i>
+    (and the Money Zone / Market Profile lineage). CPR-width thresholds here are heuristics for Nifty and
+    work best at clear extremes.
   </div>
 </div>
 
@@ -292,23 +426,32 @@ const STAGES = [
         groups: [
           { title: "Live (Nifty Futures)", fields: [
             { id: "price", t: "Futures price (LTP)" },
-            { id: "vwap",  t: "Futures VWAP (current)" },
+            { id: "vwap",  t: "Futures VWAP (current session)" },
+            { id: "wvwap", t: "Weekly VWAP (anchored to week open) — optional", opt: true },
           ] },
           { title: "Initial Balance (first hour)", fields: [
             { id: "ibh", t: "IB High (IBH)" },
             { id: "ibl", t: "IB Low (IBL)" },
           ] },
-          { title: "Previous Day profile", fields: [
+          { title: "Previous Day profile — “Day 2” (most recent session)", fields: [
             { id: "pdPOC", t: "Prev-day POC" },
-            { id: "pdVAH", t: "Prev-day VAH" },
-            { id: "pdVAL", t: "Prev-day VAL" },
-            { id: "pdHigh", t: "Prev-day High (PDH) — optional", opt: true },
-            { id: "pdLow",  t: "Prev-day Low (PDL) — optional", opt: true },
+            { id: "pdVAH", t: "Prev-day VAH (Day-2 value high)" },
+            { id: "pdVAL", t: "Prev-day VAL (Day-2 value low)" },
+            { id: "pdHigh", t: "Prev-day High (PDH) — for CPR/pivots", opt: true },
+            { id: "pdLow",  t: "Prev-day Low (PDL) — for CPR/pivots", opt: true },
+            { id: "pdClose", t: "Prev-day Close — for CPR/pivots", opt: true },
           ] },
           { title: "Previous Week profile", fields: [
             { id: "pwPOC", t: "Prev-week POC" },
             { id: "pwVAH", t: "Prev-week VAH" },
             { id: "pwVAL", t: "Prev-week VAL" },
+          ] },
+          { title: "Pivot Boss — “Day 1” (session before Day 2) · optional, for 2-day regime", fields: [
+            { id: "dbVAH", t: "Day-1 VAH — value-area regime", opt: true },
+            { id: "dbVAL", t: "Day-1 VAL — value-area regime", opt: true },
+            { id: "dbHigh", t: "Day-1 High — 2-day CPR regime", opt: true },
+            { id: "dbLow",  t: "Day-1 Low — 2-day CPR regime", opt: true },
+            { id: "dbClose", t: "Day-1 Close — 2-day CPR regime", opt: true },
           ] },
         ] },
       { id: "reaction", label: "How is price reacting at the level it's testing?",
@@ -325,7 +468,8 @@ const STAGES = [
   {
     id: "bias", label: "B · Bias", title: "Bias — which way is the pressure?",
     questions: [
-      { id: "structure", label: "Price structure (5/15-min)",
+      { id: "structure", label: "Price structure on your structure chart",
+        hint: "Read this on the same timeframe you pick in Strategy (5-min or 15-min candles).",
         opts: [
           { v: "up", t: "Uptrend — higher highs & lows", s: "" },
           { v: "down", t: "Downtrend — lower highs & lows", s: "" },
@@ -362,20 +506,35 @@ const STAGES = [
     ]
   },
   {
-    id: "strategy", label: "S · Strategy", title: "Strategy — does it line up and pay?",
+    id: "strategy", label: "S · Strategy", title: "Strategy — entry trigger, timeframe & pattern",
     questions: [
-      { id: "rr", label: "Can you define a clear stop, and is the target ≥ 2× that risk to the next level?",
-        hint: "Invalidation just beyond the level; target = next opposing reference (POC/VA edge/IB).",
+      { id: "structTf", label: "Structure / bias chart timeframe",
+        hint: "The candle series you used for structure, momentum & OI context in Bias.",
         opts: [
-          { v: "yes", t: "Yes — clean SL and R:R ≥ 1:2", s: "" },
-          { v: "tight", t: "Partly — R:R roughly 1:1", s: "Marginal" },
-          { v: "no", t: "No — can't define it / R:R poor", s: "" },
+          { v: "5m", t: "5-minute candles", s: "Standard intraday read" },
+          { v: "15m", t: "15-minute candles", s: "Slower — wider stops, fewer signals" },
         ] },
-      { id: "conviction", label: "Your honest conviction right now",
+      { id: "entryTf", label: "Entry trigger chart timeframe",
+        hint: "The candle series you watch for the actual entry trigger and pattern.",
         opts: [
-          { v: "high", t: "High — setup is textbook", s: "" },
-          { v: "med", t: "Medium — decent but not perfect", s: "" },
-          { v: "low", t: "Low — I'm forcing it", s: "" },
+          { v: "1m", t: "1-minute", s: "Scalp only — tight SL, high noise" },
+          { v: "3m", t: "3-minute", s: "" },
+          { v: "5m", t: "5-minute", s: "Recommended default for intraday options" },
+          { v: "15m", t: "15-minute", s: "Slower confirmation — use wider level buffer" },
+        ] },
+      { id: "pattern", label: "Candlestick pattern at / near the active level",
+        hint: "On your entry timeframe. “No pattern yet” = wait for confirmation before treating as GO.",
+        opts: [
+          { v: "engulf_bull", t: "Bullish engulfing", s: "Strong long confirmation at support" },
+          { v: "hammer", t: "Hammer / bullish pin bar", s: "Rejection wick at support" },
+          { v: "morning", t: "Morning star (3-candle reversal)", s: "" },
+          { v: "inside_break_up", t: "Inside bar → break UP", s: "Breakout long trigger" },
+          { v: "engulf_bear", t: "Bearish engulfing", s: "Strong short confirmation at resistance" },
+          { v: "shooting", t: "Shooting star / bearish pin bar", s: "Rejection at resistance" },
+          { v: "evening", t: "Evening star (3-candle reversal)", s: "" },
+          { v: "inside_break_down", t: "Inside bar → break DOWN", s: "Breakdown short trigger" },
+          { v: "doji", t: "Doji / indecision at level", s: "Wait — need follow-through candle" },
+          { v: "none", t: "No clear pattern yet", s: "Do not enter until a pattern forms" },
         ] },
     ]
   },
@@ -409,6 +568,95 @@ function renderProgress() {
   progressEl.appendChild(seg);
 }
 
+/* ============================================================
+   Pivot Boss module (Frank Ochoa, "Secrets of a Pivot Boss")
+   — Expanded Floor Pivots + Central Pivot Range (CPR),
+     CPR width day-type forecasting, and the seven two-day
+     relationships (used for both the value-area regime and CPR).
+   ============================================================ */
+
+/* Expanded Floor Pivots from a prior period's High, Low, Close. */
+function computeFloorPivots(H, L, C) {
+  const pivot = (H + L + C) / 3;
+  const bc = (H + L) / 2;
+  const tc = 2 * pivot - bc;            // (pivot - bc) + pivot
+  const range = H - L;
+  const r1 = 2 * pivot - L, s1 = 2 * pivot - H;
+  const r2 = pivot + range,  s2 = pivot - range;
+  const r3 = r1 + range,     s3 = s1 - range;
+  const r4 = r3 + (r2 - r1), s4 = s3 - (s1 - s2);
+  return {
+    pivot, tc, bc,
+    top: Math.max(tc, bc), bottom: Math.min(tc, bc),  // labels are nominal; plot high/low
+    width: Math.abs(tc - bc), range,
+    r1, r2, r3, r4, s1, s2, s3, s4,
+  };
+}
+
+/* Pull the prior-day (Day-2) pivots from the saved level inputs, if H/L/C present. */
+function getPivots(L) {
+  if (L && typeof L.pdHigh === "number" && typeof L.pdLow === "number" && typeof L.pdClose === "number")
+    return computeFloorPivots(L.pdHigh, L.pdLow, L.pdClose);
+  return null;
+}
+/* Day-before (Day-1) pivots for the two-day CPR relationship. */
+function getPrevPivots(L) {
+  if (L && typeof L.dbHigh === "number" && typeof L.dbLow === "number" && typeof L.dbClose === "number")
+    return computeFloorPivots(L.dbHigh, L.dbLow, L.dbClose);
+  return null;
+}
+
+/* CPR width → expected day type. Narrow = trend/breakout, wide = sideways/range.
+   Heuristic on width as % of price; strongest at clear extremes. */
+const CPR_NARROW_PCT = 0.10, CPR_WIDE_PCT = 0.30;   // % of price
+function classifyCprWidth(pv, price) {
+  const pct = price > 0 ? (pv.width / price * 100) : 0;
+  let type, dayType, note;
+  if (pct <= CPR_NARROW_PCT) {
+    type = "narrow"; dayType = "Trend / breakout day likely";
+    note = "Narrow CPR — prior session coiled; favours a directional / trending move. Watch for a clean range break with conviction.";
+  } else if (pct >= CPR_WIDE_PCT) {
+    type = "wide"; dayType = "Sideways / range day likely";
+    note = "Wide CPR — prior session ranged wide; favours rotation / chop. Fade extremes toward the CPR; breakouts tend to fail.";
+  } else {
+    type = "average"; dayType = "Typical day";
+    note = "Average CPR width — no strong day-type edge from width alone.";
+  }
+  return { pct, type, dayType, note, widthPts: pv.width };
+}
+
+/* The seven two-day relationships (Ochoa Ch.4 value areas / Ch.6 CPR).
+   recent = today's range (Day 2), older = prior range (Day 1); both {top, bottom}. */
+function twoDayRelationship(recent, older, price, noun) {
+  const tol = Math.max(2, (price || 0) * 0.0003);
+  const rt = recent.top, rb = recent.bottom, ot = older.top, ob = older.bottom;
+  const near = (a, b) => Math.abs(a - b) <= tol;
+  const N = noun || "range";
+  const Cap = N.charAt(0).toUpperCase() + N.slice(1);
+  if (near(rt, ot) && near(rb, ob))
+    return { type: "Unchanged Value", bias: "neu", dir: 0, regime: "Sideways / Breakout",
+      note: `Today's ${N} is virtually unchanged vs the prior session — acceptance. Sideways unless the open prints beyond the prior range, which can precede a breakout.` };
+  if (rb > ot)
+    return { type: "Higher Value", bias: "bull", dir: 1.5, regime: "Bullish",
+      note: `Today's ${N} is entirely higher than the prior session — most bullish regime. Buy pull-backs toward the range for a move to new highs (the open should confirm).` };
+  if (rt < ob)
+    return { type: "Lower Value", bias: "bear", dir: -1.5, regime: "Bearish",
+      note: `Today's ${N} is entirely lower than the prior session — most bearish regime. Sell rallies into the range for a move to new lows (the open should confirm).` };
+  if (rb >= ob && rt <= ot)
+    return { type: "Inside Value", bias: "neu", dir: 0, regime: "Breakout (important)",
+      note: `Today's ${N} is inside the prior session's — coiled for a breakout. A move beyond the prior range on the open signals direction. High-priority setup.` };
+  if (rb <= ob && rt >= ot)
+    return { type: "Outside Value", bias: "neu", dir: 0, regime: "Sideways",
+      note: `Today's ${N} engulfs the prior session's — typically sideways / trading-range. Fade extremes; stand aside without a clear range.` };
+  if (rt > ot && rb > ob)
+    return { type: "Overlapping Higher Value", bias: "bull", dir: 0.75, regime: "Moderately bullish",
+      note: `${Cap} is higher but overlapping the prior session's — moderately bullish. Favour longs on dips to the range.` };
+  if (rt < ot && rb < ob)
+    return { type: "Overlapping Lower Value", bias: "bear", dir: -0.75, regime: "Moderately bearish",
+      note: `${Cap} is lower but overlapping the prior session's — moderately bearish. Favour shorts on rallies to the range.` };
+  return { type: "Mixed", bias: "neu", dir: 0, regime: "Neutral", note: `No clear two-day ${N} edge.` };
+}
+
 /* ---- Level map: derive relationships from the numbers ---- */
 function computeLevelMap(L) {
   if (!L || typeof L.price !== "number") return null;
@@ -419,11 +667,39 @@ function computeLevelMap(L) {
   const valueState = (vah, val) => p > vah ? "above" : p < val ? "below" : "inside";
 
   const refs = [
-    { k: "VWAP", v: L.vwap }, { k: "IBH", v: L.ibh }, { k: "IBL", v: L.ibl },
+    { k: "VWAP", v: L.vwap }, { k: "wVWAP", v: L.wvwap }, { k: "IBH", v: L.ibh }, { k: "IBL", v: L.ibl },
     { k: "pd POC", v: L.pdPOC }, { k: "pd VAH", v: L.pdVAH }, { k: "pd VAL", v: L.pdVAL },
     { k: "PDH", v: L.pdHigh }, { k: "PDL", v: L.pdLow },
     { k: "pw POC", v: L.pwPOC }, { k: "pw VAH", v: L.pwVAH }, { k: "pw VAL", v: L.pwVAL },
   ].filter(r => typeof r.v === "number" && !isNaN(r.v));
+
+  // ---- Pivot Boss: Floor Pivots + Central Pivot Range ----
+  const pivots = getPivots(L);
+  let cpr = null, cprLoc = null, cprRel = null;
+  if (pivots) {
+    cpr = classifyCprWidth(pivots, p);
+    cprLoc = p > pivots.top + thr ? "above" : p < pivots.bottom - thr ? "below" : "inside";
+    refs.push(
+      { k: "R4", v: pivots.r4 }, { k: "R3", v: pivots.r3 }, { k: "R2", v: pivots.r2 }, { k: "R1", v: pivots.r1 },
+      { k: "CPR-TC", v: pivots.top }, { k: "Pivot", v: pivots.pivot }, { k: "CPR-BC", v: pivots.bottom },
+      { k: "S1", v: pivots.s1 }, { k: "S2", v: pivots.s2 }, { k: "S3", v: pivots.s3 }, { k: "S4", v: pivots.s4 }
+    );
+    const prevPivots = getPrevPivots(L);
+    if (prevPivots) cprRel = twoDayRelationship(
+      { top: pivots.top, bottom: pivots.bottom },
+      { top: prevPivots.top, bottom: prevPivots.bottom }, p, "CPR");
+  }
+
+  // ---- Money Zone: two-day value-area regime (Day 2 = prior day, Day 1 = day-before) ----
+  let vaRel = null;
+  if (typeof L.pdVAH === "number" && typeof L.pdVAL === "number" &&
+      typeof L.dbVAH === "number" && typeof L.dbVAL === "number") {
+    vaRel = twoDayRelationship(
+      { top: L.pdVAH, bottom: L.pdVAL },
+      { top: L.dbVAH, bottom: L.dbVAL }, p, "value area");
+  }
+
+  const hasWvwap = typeof L.wvwap === "number" && !isNaN(L.wvwap);
 
   let nearest = null;
   refs.forEach(r => {
@@ -440,10 +716,16 @@ function computeLevelMap(L) {
   if (nearest && nearest.d <= thr) {
     if (p >= nearest.v) { suggested = "support"; why = `price resting on ${nearest.k}`; }
     else { suggested = "resistance"; why = `price capped just under ${nearest.k}`; }
+  } else if (cprLoc === "above" && ib !== "below") {
+    suggested = "breakup"; why = "accepted above the central pivot range";
+  } else if (cprLoc === "below" && ib !== "above") {
+    suggested = "breakdown"; why = "accepted below the central pivot range";
   } else if (ib === "above" && pdValue === "above") {
     suggested = "breakup"; why = "accepted above IBH and prior-day value";
   } else if (ib === "below" && pdValue === "below") {
     suggested = "breakdown"; why = "accepted below IBL and prior-day value";
+  } else if (cprLoc === "inside") {
+    suggested = "midrange"; why = "inside the central pivot range (rotational)";
   } else if (pdValue === "inside") {
     suggested = "midrange"; why = "inside prior-day value, away from references";
   } else {
@@ -453,11 +735,13 @@ function computeLevelMap(L) {
   return {
     thr,
     vwap: side(L.vwap),
+    wvwap: hasWvwap ? side(L.wvwap) : null,
     ib, pdValue,
     pwValue: valueState(L.pwVAH, L.pwVAL),
     nearest, cluster,
     confluence: cluster.length >= 2 ? "strong" : cluster.length === 1 ? "some" : "none",
     suggested, why,
+    pivots, cpr, cprLoc, cprRel, vaRel,
   };
 }
 
@@ -470,6 +754,7 @@ function renderLevelRead(L) {
   const lblVal = (st) => st === "above" ? "above value" : st === "below" ? "below value" : "inside value";
   let html = `<div class="block"><h4>📍 Computed location read</h4><div class="chips">`;
   html += chip(`VWAP: <b>${m.vwap}</b>`, m.vwap === "above" ? "bull" : m.vwap === "below" ? "bear" : "neu");
+  if (m.wvwap) html += chip(`Weekly VWAP: <b>${m.wvwap}</b>`, m.wvwap === "above" ? "bull" : m.wvwap === "below" ? "bear" : "neu");
   html += chip(`Initial Balance: <b>${m.ib === "above" ? "above IBH" : m.ib === "below" ? "below IBL" : "inside IB"}</b>`, toneVal(m.ib));
   html += chip(`Prev-day: <b>${lblVal(m.pdValue)}</b>`, toneVal(m.pdValue));
   html += chip(`Prev-week: <b>${lblVal(m.pwValue)}</b>`, toneVal(m.pwValue));
@@ -480,6 +765,47 @@ function renderLevelRead(L) {
   html += `<p style="margin:6px 0 0;font-size:0.85rem;color:var(--muted)">★ Suggested reaction: <b style="color:var(--accent)">${reactLbl[m.suggested]}</b> — ${m.why}. Pre-selected below; override if price says otherwise.</p>`;
   html += `</div>`;
   return html;
+}
+
+function renderPivotRead(L) {
+  const m = computeLevelMap(L);
+  if (!m || !m.pivots) {
+    return `<div class="block"><h4>🧭 Pivot Boss — CPR, Floor Pivots &amp; Regime</h4>
+      <p style="margin:0;color:var(--muted)">Enter prior-day <b>High, Low &amp; Close</b> in the Level stage to plot the Central Pivot Range and floor pivots (R1–R4 / S1–S4). Add the <b>Day-1</b> value area &amp; H/L/C to read the two-day regime.</p></div>`;
+  }
+  const pv = m.pivots, cpr = m.cpr, loc = m.cprLoc;
+  const locTone = loc === "above" ? "bull" : loc === "below" ? "bear" : "neu";
+  const locLbl = loc === "above" ? "above CPR (bullish)" : loc === "below" ? "below CPR (bearish)" : "inside CPR (rotational)";
+  const widthTone = cpr.type === "narrow" ? "bull" : cpr.type === "wide" ? "bear" : "neu";
+  const regTone = r => r.bias === "bull" ? "bull" : r.bias === "bear" ? "bear" : "neu";
+  let h = `<div class="block"><h4>🧭 Pivot Boss — CPR, Floor Pivots &amp; Regime</h4><div class="chips">`;
+  h += chip(`Price vs CPR: <b>${locLbl}</b>`, locTone);
+  h += chip(`CPR width: <b>${Math.round(cpr.widthPts)} pts · ${cpr.pct.toFixed(2)}%</b>`, widthTone);
+  h += chip(`<b>${cpr.dayType}</b>`, widthTone);
+  if (m.vaRel) h += chip(`2-day VA: <b>${m.vaRel.regime}</b> (${m.vaRel.type})`, regTone(m.vaRel));
+  if (m.cprRel) h += chip(`2-day CPR: <b>${m.cprRel.regime}</b> (${m.cprRel.type})`, regTone(m.cprRel));
+  h += `</div>`;
+  h += `<div class="pivot-ladder">${pivotLadderRows(pv, L.price)}</div>`;
+  h += `<p style="margin:8px 0 0;font-size:0.78rem;color:var(--muted)">CPR &amp; Floor Pivots per Frank Ochoa, <i>Secrets of a Pivot Boss</i>. CPR band shaded; “← price” marks the nearest pivot. Width day-type is a heuristic — strongest at clear extremes.</p>`;
+  h += `</div>`;
+  return h;
+}
+
+function pivotLadderRows(pv, price) {
+  const rows = [
+    ["R4", pv.r4, "r"], ["R3", pv.r3, "r"], ["R2", pv.r2, "r"], ["R1", pv.r1, "r"],
+    ["TC", pv.top, "c"], ["Pivot", pv.pivot, "c"], ["BC", pv.bottom, "c"],
+    ["S1", pv.s1, "s"], ["S2", pv.s2, "s"], ["S3", pv.s3, "s"], ["S4", pv.s4, "s"],
+  ];
+  let near = null;
+  rows.forEach(rw => { const d = Math.abs(price - rw[1]); if (near == null || d < near.d) near = { k: rw[0], d }; });
+  return rows.map(rw => {
+    const cls = rw[2] === "r" ? "piv-r" : rw[2] === "s" ? "piv-s" : "piv-c";
+    const isNear = near && near.k === rw[0];
+    return `<div class="piv-row ${cls}${isNear ? " near" : ""}">` +
+      `<span class="piv-k">${rw[0]}</span><span class="piv-v">${fmtPrice(rw[1])}</span>` +
+      `${isNear ? '<span class="piv-tag">← price</span>' : ""}</div>`;
+  }).join("");
 }
 
 function hasOptionsData() {
@@ -584,7 +910,7 @@ function renderStage() {
         });
       });
       html += `</div>`;
-      if (q.id === "levels") html += `<div id="levelRead">${renderLevelRead(A.level.levels)}</div>`;
+      if (q.id === "levels") html += `<div id="levelRead">${renderLevelRead(A.level.levels)}</div><div id="pivotRead">${renderPivotRead(A.level.levels)}</div>`;
       if (q.id === "optionsData") html += `<div id="optionsRead">${renderOptionsRead()}</div>`;
     } else {
       const isReaction = q.id === "reaction";
@@ -592,6 +918,8 @@ function renderStage() {
     }
     html += `</div>`;
   });
+
+  if (stage.id === "strategy") html += renderStrategyPreview();
 
   html += `<div class="nav">
     <button class="btn-ghost" id="backBtn" ${stageIdx === 0 ? "style='visibility:hidden'" : ""}>← Back</button>
@@ -620,6 +948,8 @@ function renderStage() {
         saveDailyLevels();
         const readEl = document.getElementById("levelRead");
         if (readEl) readEl.innerHTML = renderLevelRead(A.level.levels);
+        const pivEl = document.getElementById("pivotRead");
+        if (pivEl) pivEl.innerHTML = renderPivotRead(A.level.levels);
         if (!A.level._reactionManual) {
           const m2 = computeLevelMap(A.level.levels);
           if (m2) A.level.reaction = m2.suggested;
@@ -651,6 +981,305 @@ function renderStage() {
   if (backBtn) backBtn.addEventListener("click", () => { stageIdx--; renderStage(); });
 }
 
+/* ---------------- Pattern + trade plan helpers ---------------- */
+const PATTERN_META = {
+  engulf_bull:      { dir: "bull", ok: ["support", "breakup"], label: "Bullish engulfing" },
+  hammer:           { dir: "bull", ok: ["support", "breakup"], label: "Hammer / bullish pin bar" },
+  morning:          { dir: "bull", ok: ["support", "breakup"], label: "Morning star" },
+  inside_break_up:  { dir: "bull", ok: ["breakup", "support"], label: "Inside bar break UP" },
+  engulf_bear:      { dir: "bear", ok: ["resistance", "breakdown"], label: "Bearish engulfing" },
+  shooting:         { dir: "bear", ok: ["resistance", "breakdown"], label: "Shooting star / bearish pin" },
+  evening:          { dir: "bear", ok: ["resistance", "breakdown"], label: "Evening star" },
+  inside_break_down:{ dir: "bear", ok: ["breakdown", "resistance"], label: "Inside bar break DOWN" },
+  doji:             { dir: "neu", ok: [], label: "Doji / indecision" },
+  none:             { dir: "neu", ok: [], label: "No pattern yet" },
+};
+
+const TF_LABEL = { "1m": "1-min", "3m": "3-min", "5m": "5-min", "15m": "15-min" };
+
+function fmtPrice(n) {
+  return typeof n === "number" && !isNaN(n) ? Math.round(n).toLocaleString("en-IN") : "—";
+}
+
+function levelBuffer(p) { return Math.max(10, (p || 24000) * 0.001); }
+
+function collectLevelRefs(L) {
+  if (!L) return [];
+  let arr = [
+    { k: "VWAP", v: L.vwap }, { k: "wVWAP", v: L.wvwap }, { k: "IBH", v: L.ibh }, { k: "IBL", v: L.ibl },
+    { k: "pd POC", v: L.pdPOC }, { k: "pd VAH", v: L.pdVAH }, { k: "pd VAL", v: L.pdVAL },
+    { k: "PDH", v: L.pdHigh }, { k: "PDL", v: L.pdLow },
+    { k: "pw POC", v: L.pwPOC }, { k: "pw VAH", v: L.pwVAH }, { k: "pw VAL", v: L.pwVAL },
+  ];
+  const pv = getPivots(L);
+  if (pv) arr = arr.concat([
+    { k: "R4", v: pv.r4 }, { k: "R3", v: pv.r3 }, { k: "R2", v: pv.r2 }, { k: "R1", v: pv.r1 },
+    { k: "CPR-TC", v: pv.top }, { k: "Pivot", v: pv.pivot }, { k: "CPR-BC", v: pv.bottom },
+    { k: "S1", v: pv.s1 }, { k: "S2", v: pv.s2 }, { k: "S3", v: pv.s3 }, { k: "S4", v: pv.s4 },
+  ]);
+  return arr.filter(r => typeof r.v === "number" && !isNaN(r.v)).sort((a, b) => a.v - b.v);
+}
+
+function levelsAbove(L, p, thr) {
+  return collectLevelRefs(L).filter(r => r.v > p + thr);
+}
+function levelsBelow(L, p, thr) {
+  return collectLevelRefs(L).filter(r => r.v < p - thr).reverse();
+}
+
+function pickAnchor(L, m, dir, loc) {
+  const p = L.price, thr = levelBuffer(p);
+  const above = levelsAbove(L, p, thr), below = levelsBelow(L, p, thr);
+  if (m && m.nearest) return m.nearest;
+  if (dir === "bull") {
+    if (loc === "breakup" && typeof L.ibh === "number") return { k: "IBH", v: L.ibh };
+    return below[0] || { k: "nearest support", v: p - thr };
+  }
+  if (dir === "bear") {
+    if (loc === "breakdown" && typeof L.ibl === "number") return { k: "IBL", v: L.ibl };
+    return above[0] || { k: "nearest resistance", v: p + thr };
+  }
+  return above[0] || below[0] || null;
+}
+
+function patternOk(pattern, biasDir, loc) {
+  const pm = PATTERN_META[pattern] || PATTERN_META.none;
+  if (pattern === "none" || pattern === "doji") return false;
+  if (biasDir !== "bull" && biasDir !== "bear") return false;
+  if (pm.dir !== biasDir) return false;
+  return pm.ok.includes(loc);
+}
+
+/** Strategy-only gate — drives verdict text & trade-card mode independently of context soft warns. */
+function evaluateStrategyGate(s, biasDir, loc, aligned, biasLabel) {
+  const pattern = s.pattern || "none";
+  const pm = PATTERN_META[pattern] || PATTERN_META.none;
+  const entryTf = TF_LABEL[s.entryTf] || "5-min";
+  const structTf = s.structTf === "15m" ? "15-min" : "5-min";
+  const locLabel = loc ? labelOf("level", "reaction", loc) : "—";
+  const base = { pattern, patternLabel: pm.label, entryTf, structTf, locLabel };
+
+  if (pattern === "none") {
+    return Object.assign(base, {
+      code: "no_pattern", status: "NO PATTERN", statusClass: "wait", canEnter: false,
+      headline: "Entry blocked — no candlestick pattern selected",
+      detail: `Pick a confirmed pattern on your <b>${entryTf}</b> chart. Until then the verdict cannot be GO.`,
+    });
+  }
+  if (pattern === "doji") {
+    return Object.assign(base, {
+      code: "doji", status: "INDECISION", statusClass: "wait", canEnter: false,
+      headline: "Entry blocked — doji / indecision on " + entryTf,
+      detail: "Wait for a follow-through candle (engulfing, pin bar, morning/evening star, or inside-bar break).",
+    });
+  }
+  if (biasDir === "neutral") {
+    return Object.assign(base, {
+      code: "neutral_bias", status: "BIAS UNCLEAR", statusClass: "wait", canEnter: false,
+      headline: `${pm.label} noted — bias score not directional enough`,
+      detail: `Pattern is logged but overall bias is <b>${biasLabel}</b>. Clear bullish (≥3) or bearish (≤−3) score required before GO.`,
+    });
+  }
+  if (!aligned) {
+    return Object.assign(base, {
+      code: "no_alignment", status: "LEVEL ≠ BIAS", statusClass: "wait", canEnter: false,
+      headline: `${pm.label} on ${entryTf} — level reaction doesn't support ${biasDir} bias`,
+      detail: `Price is at <b>${locLabel}</b> which conflicts with a ${biasDir === "bull" ? "long" : "short"} play. Fix level reaction or change pattern.`,
+    });
+  }
+  if (pm.dir !== biasDir) {
+    const want = biasDir === "bull" ? "Bullish engulfing, hammer, morning star, or inside-bar break UP" : "Bearish engulfing, shooting star, evening star, or inside-bar break DOWN";
+    return Object.assign(base, {
+      code: "direction_mismatch", status: "WRONG PATTERN DIRECTION", statusClass: "wait", canEnter: false,
+      headline: `${pm.label} conflicts with ${biasDir} bias`,
+      detail: `For ${biasLabel}, use: <b>${want}</b>.`,
+    });
+  }
+  if (!pm.ok.includes(loc)) {
+    return Object.assign(base, {
+      code: "location_mismatch", status: "PATTERN ≠ LEVEL TYPE", statusClass: "wait", canEnter: false,
+      headline: `${pm.label} is atypical for “${locLabel}”`,
+      detail: `This pattern normally confirms: <b>${pm.ok.join(", ")}</b>. Your reaction is <b>${loc}</b> — change pattern or update level reaction.`,
+    });
+  }
+  return Object.assign(base, {
+    code: "confirmed", status: "PATTERN CONFIRMED ✓", statusClass: "go", canEnter: true,
+    headline: `${pm.label} on ${entryTf} confirms ${biasLabel} at ${locLabel}`,
+    detail: `Structure chart: ${structTf}. Entry trigger chart: ${entryTf}. Strategy gate passes — overall GO still needs context & level gates.`,
+  });
+}
+
+function renderStrategyGate(sg) {
+  return `<div class="strategy-gate ${sg.statusClass}">
+    <div class="sg-meta">Strategy gate · <span class="tf-badge">${sg.structTf}</span> structure · <span class="tf-badge">${sg.entryTf}</span> entry · Pattern: <b>${sg.patternLabel}</b></div>
+    <div class="sg-status">${sg.status}</div>
+    <div class="sg-head">${sg.headline}</div>
+    <div style="font-size:0.88rem;color:var(--muted)">${sg.detail}</div>
+  </div>`;
+}
+
+function renderStrategyPreview() {
+  const r = evaluate();
+  const sg = r.sg;
+  const overall = r.hardFail ? "NO ENTRY (other gates)" : r.sg.canEnter ? (r.vClass === "go" ? "→ Overall: GO" : "→ Overall: WAIT (context flags)") : "→ Overall: WAIT (strategy)";
+  return `<div class="strategy-preview"><h4>Live verdict preview (updates as you select)</h4>
+    ${renderStrategyGate(sg)}
+    <p style="margin:8px 0 0;font-size:0.85rem;color:var(--accent)"><b>${overall}</b></p></div>`;
+}
+
+function buildWatchScenario(L, dir, label) {
+  const p = L.price, thr = levelBuffer(p);
+  const above = levelsAbove(L, p, thr), below = levelsBelow(L, p, thr);
+  const entryTf = TF_LABEL[A.strategy.entryTf] || "5-min";
+  const bullPat = "bullish engulfing, hammer, or morning star";
+  const bearPat = "bearish engulfing, shooting star, or evening star";
+
+  if (dir === "bull") {
+    const cross = typeof L.pdVAH === "number" ? { k: "pd VAH", v: L.pdVAH } : (typeof L.ibh === "number" ? { k: "IBH", v: L.ibh } : above[0]);
+    const refsAboveCross = collectLevelRefs(L).filter(r => r.v > (cross ? cross.v : p) + thr);
+    const tgt = cross ? (refsAboveCross[0] || { k: "next resistance", v: cross.v + thr * 2 }) : above[0];
+    const slRef = cross || below[0] || { k: "trigger", v: p };
+    return {
+      title: label || "Long (CE) — flip to GO when",
+      lines: [
+        `<b>Trigger:</b> ${entryTf} candle <b>closes above ${cross ? cross.k + " (" + fmtPrice(cross.v) + ")" : "key resistance"}</b> with ${bullPat}.`,
+        `<b>Entry:</b> Buy on retest hold above that level (don't chase the wick).`,
+        `<b>SL:</b> ${fmtPrice((slRef.v || p) - thr)} — ${Math.round(thr)} pts below ${slRef.k || "breakout"}.`,
+        `<b>Target:</b> ${tgt ? tgt.k + " (" + fmtPrice(tgt.v) + ")" : "next reference above"} — partial at VWAP / POC if in between.`,
+      ],
+    };
+  }
+  const cross = typeof L.pdVAL === "number" ? { k: "pd VAL", v: L.pdVAL } : (typeof L.ibl === "number" ? { k: "IBL", v: L.ibl } : below[0]);
+  const refsBelowCross = collectLevelRefs(L).filter(r => r.v < (cross ? cross.v : p) - thr);
+  const tgt = cross ? (refsBelowCross[refsBelowCross.length - 1] || { k: "next support", v: cross.v - thr * 2 }) : below[0];
+  const slRef = cross || above[0] || { k: "trigger", v: p };
+  return {
+    title: label || "Short (PE) — flip to GO when",
+    lines: [
+      `<b>Trigger:</b> ${entryTf} candle <b>closes below ${cross ? cross.k + " (" + fmtPrice(cross.v) + ")" : "key support"}</b> with ${bearPat}.`,
+      `<b>Entry:</b> Buy PE on retest rejection below that level.`,
+      `<b>SL:</b> ${fmtPrice((slRef.v || p) + thr)} — ${Math.round(thr)} pts above ${slRef.k || "breakdown"}.`,
+      `<b>Target:</b> ${tgt ? tgt.k + " (" + fmtPrice(tgt.v) + ")" : "next reference below"}.`,
+    ],
+  };
+}
+
+function buildTradePlan(L, m, biasDir, loc, aligned, canEnterNow) {
+  const st = A.strategy;
+  const entryTf = TF_LABEL[st.entryTf] || "5-min";
+  const structTf = st.structTf === "15m" ? "15-min" : "5-min";
+  const pattern = st.pattern || "none";
+  const pm = PATTERN_META[pattern] || PATTERN_META.none;
+
+  if (!L || typeof L.price !== "number") {
+    return { ready: false, note: "Enter futures price and levels to generate entry, SL and target." };
+  }
+  const p = L.price, thr = levelBuffer(p);
+  const above = levelsAbove(L, p, thr), below = levelsBelow(L, p, thr);
+  const dir = biasDir === "bull" ? "bull" : biasDir === "bear" ? "bear" : null;
+  const instrument = dir === "bull" ? "Long — Buy CE (or bull call spread)" : dir === "bear" ? "Short — Buy PE (or bear put spread)" : null;
+
+  const plan = {
+    ready: true, entryTf, structTf, pattern: pm.label, instrument,
+    timeframeNote: `Structure read on <span class="tf-badge">${structTf}</span> · Entry trigger on <span class="tf-badge">${entryTf}</span>`,
+    mode: "pending", entry: null, sl: null, target: null, watches: [],
+  };
+
+  if (!dir) {
+    plan.watches.push(buildWatchScenario(L, "bull", "If bias turns bullish"));
+    plan.watches.push(buildWatchScenario(L, "bear", "If bias turns bearish"));
+    plan.note = "Bias is mixed — no directional playbook until structure + levels agree.";
+    return plan;
+  }
+
+  const anchor = pickAnchor(L, m, dir, loc);
+  const tgt = dir === "bull" ? above[0] : below[0];
+  const slPrice = dir === "bull"
+    ? (anchor ? anchor.v - thr : p - thr * 2)
+    : (anchor ? anchor.v + thr : p + thr * 2);
+  const slLabel = dir === "bull"
+    ? `${fmtPrice(slPrice)} (${Math.round(thr)} pts below ${anchor ? anchor.k : "invalidation"})`
+    : `${fmtPrice(slPrice)} (${Math.round(thr)} pts above ${anchor ? anchor.k : "invalidation"})`;
+  const tgtLabel = tgt ? `${tgt.k} (${fmtPrice(tgt.v)})` : (dir === "bull" ? "next level above" : "next level below");
+
+  const stratConfirmed = patternOk(pattern, dir, loc);
+  if (canEnterNow && aligned && stratConfirmed) {
+    plan.mode = "now";
+    if (dir === "bull" && (loc === "support" || loc === "breakup")) {
+      plan.entry = loc === "breakup"
+        ? `Retest hold <b>above ${anchor.k} (${fmtPrice(anchor.v)})</b> after breakout — <b>${pm.label}</b> on ${entryTf}`
+        : `Price holding <b>above ${anchor.k} (${fmtPrice(anchor.v)})</b> — <b>${pm.label}</b> on ${entryTf} confirms long`;
+    } else if (dir === "bear" && (loc === "resistance" || loc === "breakdown")) {
+      plan.entry = loc === "breakdown"
+        ? `Retest fail <b>below ${anchor.k} (${fmtPrice(anchor.v)})</b> — <b>${pm.label}</b> on ${entryTf}`
+        : `Rejection at <b>${anchor.k} (${fmtPrice(anchor.v)})</b> — <b>${pm.label}</b> on ${entryTf} confirms short`;
+    }
+    plan.sl = slLabel;
+    plan.target = tgtLabel;
+    const risk = Math.abs(p - slPrice), reward = tgt ? Math.abs(tgt.v - p) : 0;
+    plan.rr = reward && risk ? `~1 : ${(reward / risk).toFixed(1)}` : "check vs next level";
+    return plan;
+  }
+
+  if (canEnterNow && aligned && (pattern === "none" || pattern === "doji")) {
+    plan.mode = "pending";
+    plan.note = pattern === "doji"
+      ? "Doji at the level — wait for a directional follow-through candle on " + entryTf + " before entry."
+      : "Level and bias align but no entry pattern yet — wait for confirmation on " + entryTf + ".";
+    plan.watches.push({
+      title: dir === "bull" ? "Long — enter when pattern forms" : "Short — enter when pattern forms",
+      lines: [
+        `<b>Watch:</b> ${anchor ? anchor.k + " (" + fmtPrice(anchor.v) + ")" : "active level"} on ${entryTf}.`,
+        `<b>Need:</b> ${dir === "bull" ? "Hammer, bullish engulfing, morning star, or inside-bar break UP" : "Shooting star, bearish engulfing, evening star, or inside-bar break DOWN"}.`,
+        `<b>Then SL:</b> ${slLabel} · <b>Target:</b> ${tgtLabel}`,
+      ],
+    });
+    return plan;
+  }
+
+  if (dir === "bull") {
+    if (loc === "resistance" || loc === "midrange") {
+      plan.watches.push(buildWatchScenario(L, "bull", "Long — GO when price accepts above"));
+      plan.note = loc === "resistance"
+        ? "Bullish bias but price is into resistance — don't buy CE into the ceiling."
+        : "Price in balance / no-man's-land — wait for acceptance above value or a clean support hold.";
+    } else if (loc === "breakdown") {
+      plan.watches.push(buildWatchScenario(L, "bull", "Long — only if breakdown fails"));
+      plan.note = "Bias is bullish but price broke down — wait for reclaim of broken level before longs.";
+    } else if (!aligned) {
+      plan.watches.push(buildWatchScenario(L, "bull"));
+    }
+  } else if (dir === "bear") {
+    if (loc === "support" || loc === "midrange") {
+      plan.watches.push(buildWatchScenario(L, "bear", "Short — GO when price rejects below"));
+      plan.note = loc === "support"
+        ? "Bearish bias but price is on support — don't buy PE into the floor."
+        : "Wait for rejection below VAL / IBL or a failed retest of resistance.";
+    } else if (loc === "breakup") {
+      plan.watches.push(buildWatchScenario(L, "bear", "Short — only if breakout fails"));
+      plan.note = "Bias is bearish but price broke up — wait for failure back below the level.";
+    } else if (!aligned) {
+      plan.watches.push(buildWatchScenario(L, "bear"));
+    }
+  }
+
+  if (pattern !== "none" && !patternOk(pattern, dir, loc) && aligned) {
+    plan.patternWarn = `${pm.label} does not match a typical ${dir === "bull" ? "long" : "short"} at ${labelOf("level", "reaction", loc)} — wait for a fitting pattern or reassess.`;
+  }
+
+  return plan;
+}
+
+function scoreVisual(score) {
+  const clamped = Math.max(-8, Math.min(8, score));
+  const pct = ((clamped + 8) / 16) * 100;
+  let ringClass = "neu", ringLabel = "Neutral";
+  if (score >= 3) { ringClass = "bull"; ringLabel = "Bullish lean"; }
+  else if (score <= -3) { ringClass = "bear"; ringLabel = "Bearish lean"; }
+  const fillColor = score >= 3 ? "var(--go)" : score <= -3 ? "var(--no)" : "var(--wait)";
+  return { score, display: score.toFixed(1), ringClass, ringLabel, pct, fillColor };
+}
+
 /* ---------------- Decision logic ---------------- */
 function evaluate() {
   const c = A.context, b = A.bias, s = A.strategy;
@@ -679,10 +1308,34 @@ function evaluate() {
     if (m.confluence === "none" && loc !== "midrange") { reasons.push({ t: "warn", x: "Level: no reference cluster within ~0.1% of price — weak confluence; treat as low-conviction." }); softWarn = true; }
     else if (m.confluence === "strong") { reasons.push({ t: "pass", x: `Level: strong confluence — ${m.cluster.map(c=>c.k).join(", ")} stack near price.` }); }
     if (m.vwap === "at") { reasons.push({ t: "warn", x: "Level: price is sitting right on VWAP — indecision lowers edge until it picks a side." }); softWarn = true; }
+    if (m.wvwap === "above") reasons.push({ t: "pass", x: "Level: above the weekly VWAP — higher-timeframe trend backdrop favours longs." });
+    else if (m.wvwap === "below") reasons.push({ t: "pass", x: "Level: below the weekly VWAP — higher-timeframe trend backdrop favours shorts." });
+    else if (m.wvwap === "at") { reasons.push({ t: "warn", x: "Level: price is right at the weekly VWAP — higher-timeframe pivot; wait for it to pick a side." }); softWarn = true; }
     // value-acceptance context
     if (m.pdValue === "above") reasons.push({ t: "pass", x: "Level: trading above prior-day value (VAH) — bullish acceptance backdrop." });
     else if (m.pdValue === "below") reasons.push({ t: "pass", x: "Level: trading below prior-day value (VAL) — bearish acceptance backdrop." });
     else reasons.push({ t: "warn", x: "Level: inside prior-day value — balance/rotational; extremes tend to fade toward POC." });
+  }
+
+  // ---- Pivot Boss: CPR location + width day-type ----
+  if (m && m.pivots) {
+    if (m.cprLoc === "above") reasons.push({ t: "pass", x: `Level: above the Central Pivot Range (TC ${fmtPrice(m.pivots.top)}) — bullish acceptance per the CPR.` });
+    else if (m.cprLoc === "below") reasons.push({ t: "pass", x: `Level: below the Central Pivot Range (BC ${fmtPrice(m.pivots.bottom)}) — bearish acceptance per the CPR.` });
+    else { reasons.push({ t: "warn", x: `Level: inside the Central Pivot Range (${fmtPrice(m.pivots.bottom)}–${fmtPrice(m.pivots.top)}) — rotational/indecision; edge is lower until price leaves the range.` }); softWarn = true; }
+
+    const cpr = m.cpr;
+    if (cpr.type === "narrow") {
+      reasons.push({ t: "pass", x: `Context: narrow CPR (${Math.round(cpr.widthPts)} pts · ${cpr.pct.toFixed(2)}%) — ${cpr.dayType}. Favours range breaks / trends.` });
+    } else if (cpr.type === "wide") {
+      reasons.push({ t: "warn", x: `Context: wide CPR (${Math.round(cpr.widthPts)} pts · ${cpr.pct.toFixed(2)}%) — ${cpr.dayType}. Breakouts tend to fail; lean to fading toward the CPR.` });
+      if (loc === "breakup" || loc === "breakdown") softWarn = true;
+    }
+    if (m.cprRel) reasons.push({ t: m.cprRel.bias === "neu" ? "warn" : "pass", x: `Regime: 2-day CPR is ${m.cprRel.type} → ${m.cprRel.regime}.` });
+  }
+
+  // ---- Money Zone: 2-day value-area regime ----
+  if (m && m.vaRel) {
+    reasons.push({ t: m.vaRel.bias === "neu" ? "warn" : "pass", x: `Regime: 2-day value area is ${m.vaRel.type} → ${m.vaRel.regime}.` });
   }
 
   // ---- BIAS score (+ bullish / - bearish) ----
@@ -692,9 +1345,14 @@ function evaluate() {
   if (b.momentum === "bull") score += 1.5; else if (b.momentum === "bear") score -= 1.5;
   if (m) {
     if (m.vwap === "above") score += 1; else if (m.vwap === "below") score -= 1;
+    if (m.wvwap === "above") score += 1; else if (m.wvwap === "below") score -= 1;
     if (m.pdValue === "above") score += 1.5; else if (m.pdValue === "below") score -= 1.5;
     if (m.ib === "above") score += 1; else if (m.ib === "below") score -= 1;
     if (m.pwValue === "above") score += 0.5; else if (m.pwValue === "below") score -= 0.5;
+    // Pivot Boss: price vs CPR + two-day regimes
+    if (m.cprLoc === "above") score += 1.5; else if (m.cprLoc === "below") score -= 1.5;
+    if (m.vaRel) score += m.vaRel.dir;            // value-area regime (full weight)
+    if (m.cprRel) score += m.cprRel.dir * 0.5;    // CPR regime (half — overlaps CPR location)
   }
   if (c.cue === "up") score += 1; else if (c.cue === "mildup") score += 0.5;
   else if (c.cue === "down") score -= 1; else if (c.cue === "milddown") score -= 0.5;
@@ -755,44 +1413,95 @@ function evaluate() {
   }
 
   // ---- LEVEL ↔ BIAS confluence ----
-  let aligned = false, strategy = null, action = "—";
+  let aligned = false, action = "—";
   if (biasDir === "bull") {
-    if (loc === "support") { aligned = true; action = "Long via Call (CE)"; strategy = "Bounce long: buy CE / bull-call spread as support holds. SL just below the reference, target VWAP/POC → next VA edge."; }
-    else if (loc === "breakup") { aligned = true; action = "Long via Call (CE) on retest"; strategy = "Breakout long: buy CE on a successful retest of the broken level. SL below the retest, target the next reference above."; }
-    else if (loc === "resistance") { reasons.push({ t: "fail", x: "Conflict: bullish bias but price is INTO resistance — chasing into a wall. Wait for a break + retest." }); hardFail = true; }
-    else if (loc === "breakdown") { reasons.push({ t: "fail", x: "Conflict: bullish bias but price broke DOWN — bias and level disagree. Stand aside." }); hardFail = true; }
+    if (loc === "support") { aligned = true; action = "Long via Call (CE)"; }
+    else if (loc === "breakup") { aligned = true; action = "Long via Call (CE) on retest"; }
+    else if (loc === "resistance") { reasons.push({ t: "fail", x: "Conflict: bullish bias but price is INTO resistance — don't enter; see Playbook for the level cross that flips to GO." }); hardFail = true; }
+    else if (loc === "breakdown") { reasons.push({ t: "fail", x: "Conflict: bullish bias but price broke DOWN — no entry until reclaim; see Playbook." }); hardFail = true; }
   } else if (biasDir === "bear") {
-    if (loc === "resistance") { aligned = true; action = "Short via Put (PE)"; strategy = "Rejection short: buy PE / bear-put spread as resistance rejects. SL just above the reference, target VWAP/POC → next VA edge."; }
-    else if (loc === "breakdown") { aligned = true; action = "Short via Put (PE) on retest"; strategy = "Breakdown short: buy PE on a failed retest of the broken level. SL above the retest, target the next reference below."; }
-    else if (loc === "support") { reasons.push({ t: "fail", x: "Conflict: bearish bias but price is INTO support — shorting into a floor. Wait for a break + retest." }); hardFail = true; }
-    else if (loc === "breakup") { reasons.push({ t: "fail", x: "Conflict: bearish bias but price broke UP — bias and level disagree. Stand aside." }); hardFail = true; }
+    if (loc === "resistance") { aligned = true; action = "Short via Put (PE)"; }
+    else if (loc === "breakdown") { aligned = true; action = "Short via Put (PE) on retest"; }
+    else if (loc === "support") { reasons.push({ t: "fail", x: "Conflict: bearish bias but price is INTO support — don't enter; see Playbook for the breakdown trigger." }); hardFail = true; }
+    else if (loc === "breakup") { reasons.push({ t: "fail", x: "Conflict: bearish bias but price broke UP — no entry until failure back; see Playbook." }); hardFail = true; }
   }
-  if (aligned) reasons.push({ t: "pass", x: "Confluence: bias and level agree — the trade pulls in one direction." });
+  if (aligned) reasons.push({ t: "pass", x: "Confluence: bias and level agree — directional edge exists." });
 
-  // ---- RISK / R:R gate ----
-  if (s.rr === "no") { reasons.push({ t: "fail", x: "Risk: no clean stop or poor reward-to-risk. A trade you can't define is a trade you skip." }); hardFail = true; }
-  else if (s.rr === "tight") { reasons.push({ t: "warn", x: "Risk: R:R only ~1:1 — thin edge; take only on high conviction or reduce size." }); softWarn = true; }
-  else { reasons.push({ t: "pass", x: "Risk: clean invalidation with R:R ≥ 1:2 — the math supports the trade." }); }
-  if (s.conviction === "low") { reasons.push({ t: "warn", x: "Discipline: you flagged low conviction / forcing it — that alone is a reason to pass." }); softWarn = true; }
+  // ---- Strategy: timeframe + pattern ----
+  const entryTf = TF_LABEL[s.entryTf] || "5-min";
+  const structTf = s.structTf === "15m" ? "15-min" : "5-min";
+  const pattern = s.pattern || "none";
+  const pm = PATTERN_META[pattern] || PATTERN_META.none;
+  reasons.push({ t: "pass", x: `Strategy: structure on ${structTf} candles · entry trigger on ${entryTf} candles.` });
 
-  // ---- FINAL verdict ----
-  let verdict, vClass, vSub;
-  if (hardFail) { verdict = "NO-GO"; vClass = "no"; vSub = "One or more non-negotiable conditions failed. Protect capital — wait for a cleaner setup."; }
-  else if (softWarn || s.rr === "tight" || s.conviction !== "high") { verdict = "WAIT / SMALL"; vClass = "wait"; vSub = "Setup is valid but not clean. If you act: reduce size, tighten management, or wait for one more confirmation."; }
-  else { verdict = "GO"; vClass = "go"; vSub = "Context, level, bias and risk all align. Execute the plan and manage to your stop."; }
+  if (pattern === "none") {
+    reasons.push({ t: "warn", x: `Strategy: no candlestick pattern yet on ${entryTf} — wait for confirmation before treating as GO.` });
+    softWarn = true;
+  } else if (pattern === "doji") {
+    reasons.push({ t: "warn", x: `Strategy: doji / indecision on ${entryTf} — need a follow-through candle (engulfing, pin bar, or break).` });
+    softWarn = true;
+  } else if (aligned && !patternOk(pattern, biasDir, loc)) {
+    reasons.push({ t: "warn", x: `Strategy: ${pm.label} is not a typical confirmation for this level + direction — reassess or wait for a matching pattern.` });
+    softWarn = true;
+  } else if (aligned && patternOk(pattern, biasDir, loc)) {
+    reasons.push({ t: "pass", x: `Strategy: ${pm.label} on ${entryTf} matches ${bias} bias at ${labelOf("level", "reaction", loc)}.` });
+  } else {
+    reasons.push({ t: "warn", x: `Strategy: pattern logged (${pm.label}) — use Playbook for the level cross that enables entry.` });
+  }
 
-  // strategy tweaks
+  const sv = scoreVisual(score);
+  const sg = evaluateStrategyGate(s, biasDir, loc, aligned, bias);
+  const canEnterCore = !hardFail && sg.canEnter;
+  const plan = buildTradePlan(L, m, biasDir, loc, aligned, canEnterCore);
+
+  // ---- FINAL verdict (strategy gate is checked before generic WAIT) ----
+  let verdict, vClass, vSub, verdictTag;
+  if (hardFail) {
+    verdict = "NO ENTRY NOW"; vClass = "no";
+    verdictTag = sg.canEnter ? "Pattern OK — other gates failed" : "Hard block active";
+    vSub = sg.canEnter
+      ? `Your strategy passes (${sg.patternLabel} on ${entryTf}) but context/level/bias blocks entry. See Playbook for level crosses.`
+      : `Blocked before strategy: fix context/level/bias first. Strategy says: ${sg.headline}`;
+  } else if (!sg.canEnter) {
+    vClass = "wait";
+    verdictTag = sg.status;
+    if (sg.code === "no_pattern") {
+      verdict = "WAIT — SELECT A PATTERN"; vSub = sg.detail;
+    } else if (sg.code === "doji") {
+      verdict = "WAIT — DOJI / NO TRIGGER"; vSub = sg.detail;
+    } else if (sg.code === "direction_mismatch") {
+      verdict = "WAIT — WRONG PATTERN"; vSub = sg.detail;
+    } else if (sg.code === "location_mismatch") {
+      verdict = "WAIT — PATTERN ≠ LEVEL"; vSub = sg.detail;
+    } else if (sg.code === "neutral_bias") {
+      verdict = "WAIT — BIAS NOT CLEAR"; vSub = sg.detail;
+    } else {
+      verdict = "WAIT — LEVEL / BIAS"; vSub = sg.detail;
+    }
+  } else if (softWarn) {
+    verdict = "GO — ENTER (REDUCED SIZE)"; vClass = "go"; verdictTag = "Strategy confirmed + soft context flags";
+    vSub = `${sg.headline}. Size down because of context warnings (time/VIX/volume). SL/target on trade card.`;
+  } else {
+    verdict = "GO — ENTER NOW"; vClass = "go"; verdictTag = "All gates passed";
+    vSub = `${sg.headline}. Execute on ${entryTf}; SL/target from level map below.`;
+  }
+
   let notes = [];
-  if (aligned) {
-    if (m && m.nearest) notes.push(`Reference levels for management — nearest: ${m.nearest.k} (${Math.round(m.nearest.v)}). Use POC / VA edges / IBH-IBL as targets and stops.`);
-    if (c.expiry === "yes") notes.push("Expiry day: theta is brutal — prefer ATM/slightly-ITM strikes, scalp, and don't hold losers hoping.");
-    if (c.vix === "high" || c.vix === "elevated") notes.push("Higher VIX: premiums are inflated — consider a spread (buy + sell) to cut cost and define risk.");
-    if (c.vix === "vlow") notes.push("Low VIX: cheap premium but small expected move — keep targets realistic.");
-    if (m && m.pdValue === "inside") notes.push("Inside prior-day value: balance conditions — fade VA edges toward POC rather than expecting a big trend.");
-    if (m && m.confluence === "strong") notes.push("Strong confluence justifies a slightly larger (but still planned) size.");
-  }
+  if (m && m.nearest) notes.push(`Nearest reference: ${m.nearest.k} (${fmtPrice(m.nearest.v)}). Trail / partial at VWAP, POC, VA edges.`);
+  if (c.expiry === "yes") notes.push("Expiry day: theta is brutal — ATM/slightly ITM, scalp, tight SL.");
+  if (c.vix === "high" || c.vix === "elevated") notes.push("Elevated VIX: prefer spreads to cap premium.");
+  if (c.vix === "vlow") notes.push("Low VIX: smaller expected range — realistic targets.");
+  if (m && m.pdValue === "inside") notes.push("Inside prior-day value: rotational — targets toward POC, not runaway trends.");
+  if (m && m.cpr) notes.push(`CPR width ${Math.round(m.cpr.widthPts)} pts (${m.cpr.pct.toFixed(2)}%) → ${m.cpr.dayType}. ${m.cpr.note}`);
+  if (m && m.vaRel) notes.push(`2-day value area: ${m.vaRel.type} → ${m.vaRel.regime}. ${m.vaRel.note}`);
+  if (m && m.cprRel) notes.push(`2-day CPR: ${m.cprRel.type} → ${m.cprRel.regime}. ${m.cprRel.note}`);
+  if (plan.rr) notes.push(`Estimated R:R from current price to target vs SL: ${plan.rr} (rule-of-thumb from your levels).`);
 
-  return { verdict, vClass, vSub, reasons, ctxState, lvlState, bias, action, strategy, notes, score, m };
+  const regime = (m && m.vaRel && m.vaRel.regime) || (m && m.cprRel && m.cprRel.regime) || null;
+  return {
+    verdict, vClass, vSub, verdictTag, reasons, ctxState, lvlState, bias, action,
+    notes, score, sv, m, plan, aligned, pattern, entryTf, structTf, sg, hardFail, regime,
+  };
 }
 
 function labelOf(stageId, qId, val) {
@@ -802,47 +1511,145 @@ function labelOf(stageId, qId, val) {
   return o ? o.t : val;
 }
 
+function renderTradeCard(plan, sg, vClass) {
+  if (!plan || !plan.ready) {
+    return `<div class="block"><p style="margin:0;color:var(--muted)">${plan ? plan.note : ""}</p></div>`;
+  }
+  const active = plan.mode === "now" && sg.canEnter && vClass === "go";
+  const cardClass = active ? "go" : "pending";
+  const head = active
+    ? "Active trade map — pattern confirmed"
+    : sg.canEnter ? "Trade map (waiting on context)" : "Trade map (strategy not confirmed)";
+  let h = `<div class="trade-card ${cardClass}"><div class="head">${head}</div>`;
+  h += `<div class="trade-row"><div class="k">Chart</div><div class="v">${plan.timeframeNote}</div></div>`;
+  if (plan.instrument) h += `<div class="trade-row"><div class="k">Side</div><div class="v">${plan.instrument}</div></div>`;
+  if (plan.pattern) h += `<div class="trade-row"><div class="k">Pattern</div><div class="v"><b>${plan.pattern}</b></div></div>`;
+  if (plan.entry) h += `<div class="trade-row"><div class="k">Entry</div><div class="v">${plan.entry}</div></div>`;
+  if (plan.sl) h += `<div class="trade-row"><div class="k">Stop (SL)</div><div class="v">${plan.sl}</div></div>`;
+  if (plan.target) h += `<div class="trade-row"><div class="k">Target</div><div class="v"><b>${plan.target}</b></div></div>`;
+  if (plan.rr) h += `<div class="trade-row"><div class="k">R:R</div><div class="v">${plan.rr}</div></div>`;
+  if (plan.note) h += `<div class="trade-row"><div class="k">Note</div><div class="v">${plan.note}</div></div>`;
+  if (plan.patternWarn) h += `<div class="trade-row"><div class="k">Pattern</div><div class="v" style="color:var(--wait)">${plan.patternWarn}</div></div>`;
+  h += `</div>`;
+  return h;
+}
+
+function renderWatchGrid(plan) {
+  if (!plan || !plan.watches || !plan.watches.length) return "";
+  const two = plan.watches.length >= 2 ? " two" : "";
+  let h = `<div class="watch-grid${two}">`;
+  plan.watches.forEach((w, i) => {
+    const cls = w.title.toLowerCase().includes("short") || w.title.toLowerCase().includes("bear") ? "bear" : "bull";
+    h += `<div class="watch-box ${cls}"><h5>${w.title}</h5><ul>`;
+    w.lines.forEach(l => { h += `<li>${l}</li>`; });
+    h += `</ul></div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+function renderScoreHero(sv, vClass) {
+  return `<div class="score-hero">
+    <div class="score-ring-wrap">
+      <div class="score-ring ${sv.ringClass}">
+        <div class="num">${sv.display}</div>
+        <div class="lbl">Bias score</div>
+      </div>
+      <div style="font-size:0.85rem;color:var(--muted)">${sv.ringLabel}</div>
+      <div class="score-meter"><div class="fill" style="width:${sv.pct}%;background:${sv.fillColor}"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted)">
+        <span>−8 bear</span><span>0</span><span>+8 bull</span>
+      </div>
+    </div>
+    <div class="verdict-legend">
+      <div class="legend-item"><span class="legend-dot go"></span><div><b>GO — Enter now</b><br><span style="color:var(--muted)">Score ≥ 3 or ≤ −3, level+bias aligned, pattern confirms on entry TF. Trade card shows entry / SL / target.</span></div></div>
+      <div class="legend-item"><span class="legend-dot wait"></span><div><b>WAIT — Setup forming</b><br><span style="color:var(--muted)">Edge exists but pattern missing, context soft, or partial alignment. Playbook shows level crosses to watch.</span></div></div>
+      <div class="legend-item"><span class="legend-dot no"></span><div><b>NO ENTRY NOW</b><br><span style="color:var(--muted)">Hard gate (event, close, mid-range, conflict). Don't force — Playbook lists what would flip to GO.</span></div></div>
+    </div>
+  </div>`;
+}
+
 function renderResult() {
   renderProgress();
   const r = evaluate();
-  let html = `<div class="verdict ${r.vClass}">
-    <div class="big">${r.verdict}</div>
-    <div class="sub">${r.vSub}</div>
-  </div>`;
+  const plan = r.plan;
 
-  html += `<div class="summary">
-    <div class="sumcard ctx"><div class="k">Context</div><div class="v">${r.ctxState}</div></div>
-    <div class="sumcard lvl"><div class="k">Level</div><div class="v">${r.lvlState}</div></div>
-    <div class="sumcard bias"><div class="k">Bias</div><div class="v">${r.bias}</div></div>
-    <div class="sumcard strat"><div class="k">Action</div><div class="v">${r.action}</div></div>
-  </div>`;
+  const dash = `
+    ${renderStrategyGate(r.sg)}
+    <div class="verdict-banner ${r.vClass}">
+      <div class="big">${r.verdict}</div>
+      <div class="tagline">${r.verdictTag}</div>
+      <div class="sub">${r.vSub}</div>
+    </div>
+    ${renderScoreHero(r.sv, r.vClass)}
+    <div class="summary">
+      <div class="sumcard ctx"><div class="k">Context</div><div class="v">${r.ctxState}</div></div>
+      <div class="sumcard lvl"><div class="k">Level</div><div class="v">${r.lvlState}</div></div>
+      <div class="sumcard bias"><div class="k">Bias</div><div class="v">${r.bias}</div></div>
+      <div class="sumcard strat"><div class="k">Strategy</div><div class="v">${r.sg.status}</div></div>
+      <div class="sumcard strat"><div class="k">Action</div><div class="v">${r.action}</div></div>
+      ${r.regime ? `<div class="sumcard lvl"><div class="k">Regime (2-day)</div><div class="v">${r.regime}</div></div>` : ""}
+    </div>
+    ${renderTradeCard(plan, r.sg, r.vClass)}
+    ${r.m && r.m.pivots ? renderPivotRead(A.level.levels) : ""}
+    ${r.notes.length ? `<div class="block"><h4>Management notes</h4><ul>${r.notes.map(n => `<li>${n}</li>`).join("")}</ul></div>` : ""}
+  `;
 
-  if (r.m) html += renderLevelRead(A.level.levels);
-  if (hasOptionsData()) html += renderOptionsRead();
+  const playbook = `
+    <div class="block"><h4>📖 Level-cross playbook</h4>
+      <p style="margin:0 0 12px;font-size:0.88rem;color:var(--muted)">
+        Trades are defined by <b>which level Nifty Futures cross</b> on your <span class="tf-badge">${r.entryTf}</span> entry chart,
+        with structure confirmed on <span class="tf-badge">${r.structTf}</span>.
+        ${r.vClass === "no" ? "You are blocked from entry now — below is when that changes." : r.vClass === "wait" ? "Wait for the trigger below before sizing up." : "You may enter per the active card; if missed, use watches as backup."}
+      </p>
+    </div>
+    ${renderStrategyGate(r.sg)}
+    ${renderTradeCard(plan, r.sg, r.vClass)}
+    ${renderWatchGrid(plan)}
+    ${r.m ? renderLevelRead(A.level.levels) : ""}
+    ${r.m && r.m.pivots ? renderPivotRead(A.level.levels) : ""}
+    ${hasOptionsData() ? renderOptionsRead() : ""}
+  `;
 
-  if (r.strategy && r.vClass !== "no") {
-    html += `<div class="block"><h4>📋 Suggested play</h4><ul><li>${r.strategy}</li>`;
-    r.notes.forEach(n => html += `<li>${n}</li>`);
-    html += `</ul></div>`;
-  }
+  const audit = `
+    ${r.m ? renderLevelRead(A.level.levels) : ""}
+    ${hasOptionsData() ? renderOptionsRead() : ""}
+    <div class="block"><h4>🧭 Full audit trail</h4><ul>
+      ${r.reasons.map(rr => {
+        const cls = rr.t === "pass" ? "reason-pass" : rr.t === "fail" ? "reason-fail" : "reason-warn";
+        return `<li class="${cls}">${rr.x}</li>`;
+      }).join("")}
+    </ul></div>
+  `;
 
-  html += `<div class="block"><h4>🧭 Why this verdict</h4><ul>`;
-  r.reasons.forEach(rr => {
-    const cls = rr.t === "pass" ? "reason-pass" : rr.t === "fail" ? "reason-fail" : "reason-warn";
-    html += `<li class="${cls}">${rr.x}</li>`;
+  app.innerHTML = `
+    <div class="view-tabs">
+      <button class="view-tab active" data-view="dashboard">Dashboard</button>
+      <button class="view-tab" data-view="playbook">Playbook</button>
+      <button class="view-tab" data-view="audit">Audit trail</button>
+    </div>
+    <div class="result-pane active" id="pane-dashboard">${dash}</div>
+    <div class="result-pane" id="pane-playbook">${playbook}</div>
+    <div class="result-pane" id="pane-audit">${audit}</div>
+    <div class="nav">
+      <button class="btn-ghost" id="backBtn">← Edit inputs</button>
+      <button class="btn-primary" id="restartBtn">↻ New assessment</button>
+    </div>
+  `;
+
+  app.querySelectorAll(".view-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      app.querySelectorAll(".view-tab").forEach(b => b.classList.remove("active"));
+      app.querySelectorAll(".result-pane").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("pane-" + btn.dataset.view).classList.add("active");
+    });
   });
-  html += `</ul></div>`;
 
-  html += `<div class="nav">
-    <button class="btn-ghost" id="backBtn">← Edit inputs</button>
-    <button class="btn-primary" id="restartBtn">↻ New assessment</button>
-  </div>`;
-
-  app.innerHTML = html;
   document.getElementById("backBtn").addEventListener("click", () => { stageIdx = STAGES.length - 1; renderStage(); });
   document.getElementById("restartBtn").addEventListener("click", () => {
     STAGES.forEach(s => A[s.id] = {});
-    savedLevelsMeta = loadDailyLevels(); // keep today's reference levels pre-filled
+    savedLevelsMeta = loadDailyLevels();
     stageIdx = 0; renderStage();
   });
 }
